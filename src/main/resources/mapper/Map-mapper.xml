@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--MemberMapper 등록-->
+<mapper namespace="com.highfive.chajiserver.mapper.MapMapper">
+    <!--    쿼리 작성-->
+    <select id="getZscode" parameterType="ZscodeMappingDTO" resultType="String">
+        SELECT zscode FROM zscode_mapping WHERE sigungu_name = #{sigunguName} AND zcode =#{zcode}
+    </select>
+
+</mapper>
