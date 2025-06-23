@@ -21,8 +21,22 @@ public class StationController {
             return ResponseEntity.ok("충전소 정보 캐싱 완료");
         } catch (Exception e) {
             e.printStackTrace();
-            return ResponseEntity.status(500).body("서버 오류 발생");
+            return ResponseEntity.status(500).body("setStationNear 오류 발생");
+        }
+    }
+
+    @PostMapping("getStationNear")
+    public ResponseEntity<?> getStationNear(@RequestBody Map<String, Double> body) {
+        try{
+           return service.getStationNear(body);
+        }catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500).body("getStationNear 오류 발생");
         }
 
     }
+
+
+
+
 } // class
