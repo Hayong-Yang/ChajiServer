@@ -26,7 +26,7 @@ public class StationController {
     }
 
     @PostMapping("getStationNear")
-    public ResponseEntity<?> getStationNear(@RequestBody Map<String, Double> body) {
+    public ResponseEntity<?> getStationNear(@RequestBody Map<String, Object> body) {
         try{
            return service.getStationNear(body);
         }catch (Exception e) {

@@ -47,6 +47,7 @@ public class ChargerApiUtil {
                 dto.setStatNm(obj.getString("statNm"));
                 dto.setStatId(obj.getString("statId"));
                 dto.setChgerId(obj.getString("chgerId"));
+                dto.setChgerType(obj.getString("chgerType"));
                 dto.setAddr(obj.getString("addr"));
                 dto.setAddrDetail(obj.getString("addrDetail"));
                 dto.setLocation(obj.getString("location"));

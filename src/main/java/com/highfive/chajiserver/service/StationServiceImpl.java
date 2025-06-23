@@ -45,11 +45,33 @@ public class StationServiceImpl implements StationService {
     }
 
     @Override
-    public ResponseEntity<?> getStationNear(Map<String, Double> body) {
+    public ResponseEntity<?> getStationNear(Map<String, Object> body) {
         try {
             // 안전하게 위.경도 받기
             double lat = extractDouble(body.get("lat"));
             double lon = extractDouble(body.get("lon"));
+
+            // ✅ 프론트에서 전달된 필터값 꺼내기 (기본값 처리 포함)
+            boolean freeParking = Boolean.TRUE.equals(body.get("freeParking"));
+            boolean noLimit = Boolean.TRUE.equals(body.get("noLimit"));
+            String provider = body.get("provider") != null ? body.get("provider").toString().trim() : "";
+
+            List<String> typeList = new ArrayList<>();
+            if (body.get("type") instanceof List) {
+                typeList = (List<String>) body.get("type");
+            } else if (body.get("type") instanceof String) {
+                typeList.add(body.get("type").toString());
+            }
+
+            // outputMin/outputMax 필터값 받아오기 (없으면 기본값)
+            int outputMin = 0;
+            int outputMax = 350;
+            if (body.get("outputMin") != null) {
+                outputMin = Integer.parseInt(body.get("outputMin").toString());
+            }
+            if (body.get("outputMax") != null) {
+                outputMax = Integer.parseInt(body.get("outputMax").toString());
+            }
 
             System.out.println("백에서 받은 좌표: " + lat + ", " + lon);
 
@@ -58,10 +80,33 @@ public class StationServiceImpl implements StationService {
             List<StationDTO> nearby = new ArrayList<>();
 
             for (StationDTO station : allStations) {
-                if (geoUtil.isWithinRadius(lat, lon, station.getLat(), station.getLng(), 1000)) {
-                    nearby.add(station);
-                }
+                if (!geoUtil.isWithinRadius(lat, lon, station.getLat(), station.getLng(), 1000))  continue;
+
+                // ✅ 2. 무료 주차 필터
+                if (freeParking && !"Y".equalsIgnoreCase(station.getParkingFree())) continue;
+
+                // ✅ 3. 이용 제한 필터
+                if (noLimit && (
+                        "Y".equalsIgnoreCase(station.getLimitYn()) ||
+                                (station.getNote() != null && station.getNote().contains("이용 불가"))
+                )) continue;
+
+                // output 구간 필터 (outputMin ~ outputMax 사이만 통과)
+                double outputValue = 0;
+                try {
+                    outputValue = Double.parseDouble(station.getOutput().toString());
+                } catch (Exception ignore) {}
+                if (outputValue < outputMin || outputValue > outputMax) continue;
+
+                // ✅ 충전기 타입 필터 (수정됨)
+                if (!typeList.isEmpty() && !typeList.contains(String.valueOf(station.getChgerType()).trim())) continue;
+
+                // ✅ 6. 사업자 필터
+                if (!provider.isEmpty() && !station.getBnm().contains(provider)) continue;
+
+                nearby.add(station);
             }
+
             // 3. 결과를 JSON으로 변환
             JSONArray arr = new JSONArray();
             for (StationDTO station : nearby) {
