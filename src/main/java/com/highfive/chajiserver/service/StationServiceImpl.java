@@ -54,7 +54,13 @@ public class StationServiceImpl implements StationService {
             // ✅ 프론트에서 전달된 필터값 꺼내기 (기본값 처리 포함)
             boolean freeParking = Boolean.TRUE.equals(body.get("freeParking"));
             boolean noLimit = Boolean.TRUE.equals(body.get("noLimit"));
-            String provider = body.get("provider") != null ? body.get("provider").toString().trim() : "";
+
+            List<String> providerList = new ArrayList<>();
+            if (body.get("provider") instanceof List) {
+                providerList = (List<String>) body.get("provider");
+            } else if (body.get("provider") instanceof String) {
+                providerList.add(body.get("provider").toString());
+            }
 
             List<String> typeList = new ArrayList<>();
             if (body.get("type") instanceof List) {
@@ -102,7 +108,9 @@ public class StationServiceImpl implements StationService {
                 if (!typeList.isEmpty() && !typeList.contains(String.valueOf(station.getChgerType()).trim())) continue;
 
                 // ✅ 6. 사업자 필터
-                if (!provider.isEmpty() && !station.getBnm().contains(provider)) continue;
+                if (!providerList.isEmpty() &&
+                        !providerList.contains(station.getBusiId())
+                ) continue;
 
                 nearby.add(station);
             }
