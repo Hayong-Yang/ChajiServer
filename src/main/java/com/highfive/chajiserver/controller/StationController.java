@@ -40,7 +40,7 @@ public class StationController {
 
     @PostMapping("/getStationsNearWaypoints")
     public ResponseEntity<List<StationDTO>> getStationsNearWaypoints(@RequestBody  List<LatLngDTO> waypoints) {
-        double radiusMeters  = 10000; // 10km
+        double radiusMeters  = 5000; // 10km: 10000
         List<StationDTO> stations = service.findStationsNearWaypoints(waypoints, radiusMeters );
         return ResponseEntity.ok(stations);
     }
