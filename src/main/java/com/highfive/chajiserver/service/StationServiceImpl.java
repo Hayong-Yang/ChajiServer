@@ -87,8 +87,15 @@ public class StationServiceImpl implements StationService {
 
             System.out.println("백에서 받은 좌표: " + lat + ", " + lon);
 
-            // ✅ 필터 조건 통과한 충전소만 담는 리스트
+            // 필터 조건 통과한 충전소만 담는 리스트
             List<StationDTO> stationList = new ArrayList<>();
+
+            // 수정된 부분: 타입 또는 사업자 리스트가 비어있으면 아무 결과도 반환하지 않음
+            if (typeList.isEmpty() || providerList.isEmpty()) {
+                return ResponseEntity.ok()
+                        .header("Content-Type", "application/json; charset=UTF-8")
+                        .body("[]");
+            }
 
             for (StationDTO station : stationCache.getAll()) {
                 if (!geoUtil.isWithinRadius(lat, lon, station.getLat(), station.getLng(), 1000)) continue;
