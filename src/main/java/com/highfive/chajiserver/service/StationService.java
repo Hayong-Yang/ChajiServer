@@ -10,5 +10,6 @@ import java.util.Map;
 public interface StationService {
     void setStationNear(Map<String, Double> body);
     ResponseEntity<?> getStationNear(Map<String, Object> body);
-    List<StationDTO> findStationsNearWaypoints(List<LatLngDTO> waypoints, double radiusMeters );
+    List<StationDTO> HighStationsNearWaypoints(List<LatLngDTO> waypoints, double radiusMeters);
+    List<StationDTO> AllStationsNearWaypoints(List<LatLngDTO> waypoints, double radiusMeters);
 }

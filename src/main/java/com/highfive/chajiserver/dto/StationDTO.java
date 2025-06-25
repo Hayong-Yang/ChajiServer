@@ -38,4 +38,6 @@ public class StationDTO {
     private String delDetail; //삭제 사유
     private String trafficYn; //편의제공 여부 ***
     private String year; //설치년도 ***
+
+    private double distance;  // 서비스 filterStations의 거리 계산 로직에 사용하는 필드
 }
