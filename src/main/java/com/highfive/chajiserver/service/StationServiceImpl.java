@@ -15,6 +15,11 @@ import org.json.JSONObject;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -86,43 +91,52 @@ public class StationServiceImpl implements StationService {
 
             System.out.println("백에서 받은 좌표: " + lat + ", " + lon);
 
-            // 2. 캐시에서 충전소 리스트 가져와 반경 필터링
-            List<StationDTO> allStations = new ArrayList<>(stationCache.getAll());
-            List<StationDTO> nearby = new ArrayList<>();
+            // ✅ 필터 조건 통과한 충전소만 담는 리스트
+            List<StationDTO> stationList = new ArrayList<>();
 
-            for (StationDTO station : allStations) {
-                if (!geoUtil.isWithinRadius(lat, lon, station.getLat(), station.getLng(), 1000))  continue;
-
-                // ✅ 2. 무료 주차 필터
+            for (StationDTO station : stationCache.getAll()) {
+                if (!geoUtil.isWithinRadius(lat, lon, station.getLat(), station.getLng(), 1000)) continue;
+                if ("Y".equalsIgnoreCase(station.getDelYn())) continue;
                 if (freeParking && !"Y".equalsIgnoreCase(station.getParkingFree())) continue;
+                if (noLimit && ("Y".equalsIgnoreCase(station.getLimitYn()) ||
+                        (station.getNote() != null && station.getNote().contains("이용 불가")))) continue;
 
-                // ✅ 3. 이용 제한 필터
-                if (noLimit && (
-                        "Y".equalsIgnoreCase(station.getLimitYn()) ||
-                                (station.getNote() != null && station.getNote().contains("이용 불가"))
-                )) continue;
-
-                // output 구간 필터 (outputMin ~ outputMax 사이만 통과)
                 double outputValue = 0;
                 try {
                     outputValue = Double.parseDouble(station.getOutput().toString());
                 } catch (Exception ignore) {}
                 if (outputValue < outputMin || outputValue > outputMax) continue;
 
-                // ✅ 충전기 타입 필터 (수정됨)
                 if (!typeList.isEmpty() && !typeList.contains(String.valueOf(station.getChgerType()).trim())) continue;
+                if (!providerList.isEmpty() && !providerList.contains(station.getBusiId())) continue;
 
-                // ✅ 6. 사업자 필터
-                if (!providerList.isEmpty() &&
-                        !providerList.contains(station.getBusiId())
-                ) continue;
-
-                nearby.add(station);
+                // ✅ 통과한 충전소만 리스트에 저장
+                stationList.add(station);
             }
+
+            // ✅ 리스트에 담긴 충전소들만 점수 계산 및 정렬
+            List<Map.Entry<StationDTO, Integer>> scoredList = new ArrayList<>();
+            for (StationDTO station : stationList) {
+                int score = 0;
+                if ("Y".equalsIgnoreCase(station.getParkingFree())) score += 15;
+                if ("Y".equalsIgnoreCase(station.getTrafficYn())) score += 10;
+                if (station.getUseTime() != null && station.getUseTime().contains("24시간")) score += 10;
+                if (station.getStatUpdDt() != null && isWithinLast24Hours(station.getStatUpdDt())) score += 5;
+                if (station.getLastTsdt() != null && !station.getLastTsdt().isEmpty()) score += 5;
+                if ("Y".equalsIgnoreCase(station.getLimitYn())) score -= 30;
+
+                scoredList.add(new AbstractMap.SimpleEntry<>(station, score));
+            }
+
+            // 스코어 내림차순 정렬
+            scoredList.sort(Map.Entry.<StationDTO, Integer>comparingByValue().reversed());
 
             // 3. 결과를 JSON으로 변환
             JSONArray arr = new JSONArray();
-            for (StationDTO station : nearby) {
+            for (Map.Entry<StationDTO, Integer> entry : scoredList) {
+                StationDTO station = entry.getKey();
+                int score         = entry.getValue();
+
                 JSONObject obj = new JSONObject();
                 obj.put("statNm", station.getStatNm());
                 obj.put("statId", station.getStatId());
@@ -159,6 +173,7 @@ public class StationServiceImpl implements StationService {
                 obj.put("year", station.getYear());
                 obj.put("logoUrl", CompanyLogoCache.getLogoUrl(station.getBusiId()));
 
+                obj.put("recommendScore", score);
                 arr.put(obj);
             }
 
@@ -170,6 +185,16 @@ public class StationServiceImpl implements StationService {
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.internalServerError().body("{\"error\":\"Internal Server Error\"}");
+        }
+    }
+
+    private boolean isWithinLast24Hours(String statUpdDt) {
+        try {
+            DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
+            LocalDateTime updated = LocalDateTime.parse(statUpdDt, fmt);
+            return Duration.between(updated, LocalDateTime.now()).toHours() < 24;
+        } catch (DateTimeParseException | NullPointerException e) {
+            return false;
         }
     }
 

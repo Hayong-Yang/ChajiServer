@@ -18,6 +18,7 @@ import java.util.List;
 @Component
 @Slf4j
 public class ChargerApiUtil {
+
     // 하용 서비스 키
 //    private final static String urlEncoded = "Wq%2BLPbmdYSbixCNUPkPm%2B3vWdEP6EHCS%2Fx%2FUNPAejzZCAlbDERkA7NZG3aqfORfDOT9cc1Sa7KgaXrpIzaaNAQ%3D%3D";
     // 동현 서비스 키
