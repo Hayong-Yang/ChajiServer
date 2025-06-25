@@ -1,10 +1,13 @@
 package com.highfive.chajiserver.controller;
 
+import com.highfive.chajiserver.dto.LatLngDTO;
+import com.highfive.chajiserver.dto.StationDTO;
 import com.highfive.chajiserver.service.StationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 @CrossOrigin(origins="http://localhost:5173", allowCredentials = "true")
@@ -33,7 +36,13 @@ public class StationController {
             e.printStackTrace();
             return ResponseEntity.status(500).body("getStationNear 오류 발생");
         }
+    }
 
+    @PostMapping("/getStationsNearWaypoints")
+    public ResponseEntity<List<StationDTO>> getStationsNearWaypoints(@RequestBody  List<LatLngDTO> waypoints) {
+        double radiusMeters  = 10000; // 10km
+        List<StationDTO> stations = service.findStationsNearWaypoints(waypoints, radiusMeters );
+        return ResponseEntity.ok(stations);
     }
 
 
