@@ -18,14 +18,22 @@ import java.util.List;
 @Component
 @Slf4j
 public class ChargerApiUtil {
+
+    // 하용 서비스 키
+//    private final static String urlEncoded = "Wq%2BLPbmdYSbixCNUPkPm%2B3vWdEP6EHCS%2Fx%2FUNPAejzZCAlbDERkA7NZG3aqfORfDOT9cc1Sa7KgaXrpIzaaNAQ%3D%3D";
+    // 동현 서비스 키
+//    private final static String urlEncoded = "fy5BXzZbOlT5f8Rm%2FvV7CSbFwdw2WNrfeE5oJcOl%2Ffj6QY3vOzoIhLzhftkVLtK415OcxJVXkpJPurYA%2F%2FWTwg%3D%3D";
+    // 혜진 서비스 키
+//    private final static String urlEncoded = "5fh1iyaZ1J7cmI8j1rYxs8gqu38xTrq7tfhweTdERepTeyYpeyqRArG1Ja1re0szzkXY%2B%2Fu%2BeObGbhZ6f%2B41mg%3D%3D";
+    // 현서 서비스 키
     private final static String urlEncoded = "NUqg9iZg%2BR57kpL1qrF1tst%2BAG3VXF5LAecO%2BCNKVMPmo34670TTUOan29Sq5DgB6%2FUXYTHmJOsUHoUp0CuKQw%3D%3D";
 
     public List<StationDTO> getStationsByZscode(String zscode) {
         List<StationDTO> result = new ArrayList<>();
         try {
             String urlStr = "http://apis.data.go.kr/B552584/EvCharger/getChargerInfo?serviceKey="
-                    +urlEncoded+"&numOfRows=9999&pageNo=1&zscode="
-                    +zscode+"&dataType=JSON";
+                    + urlEncoded + "&numOfRows=9999&pageNo=1&zscode="
+                    + zscode + "&dataType=JSON";
 
             URL url = new URL(urlStr);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
@@ -38,6 +46,8 @@ public class ChargerApiUtil {
                 sb.append(line);
             }
             br.close();
+//// ✅ 응답 전체 로그 찍기
+//            log.info("🚨 zscode={} | API 응답: {}", zscode, sb.toString());
 
             JSONObject root = new JSONObject(sb.toString());
             JSONArray items = root.getJSONObject("items").getJSONArray("item");

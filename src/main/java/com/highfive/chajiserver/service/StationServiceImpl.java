@@ -2,7 +2,10 @@ package com.highfive.chajiserver.service;
 
 import com.highfive.chajiserver.cache.CompanyLogoCache;
 import com.highfive.chajiserver.cache.StationCache;
+import com.highfive.chajiserver.cache.StationMemoryFromDBCache;
+import com.highfive.chajiserver.dto.LatLngDTO;
 import com.highfive.chajiserver.dto.StationDTO;
+import com.highfive.chajiserver.util.AllStationsDBUtil;
 import com.highfive.chajiserver.util.ChargerApiUtil;
 import com.highfive.chajiserver.util.GeoUtil;
 import com.highfive.chajiserver.util.ReverseGeo;
@@ -28,6 +31,8 @@ public class StationServiceImpl implements StationService {
     private final ReverseGeo reverseGeo;
     private final StationCache stationCache;
     private final GeoUtil geoUtil;
+    private final AllStationsDBUtil allStationsDBUtil;
+    private final StationMemoryFromDBCache stationMemoryFromDBCache;
 
 
     @Override
@@ -200,4 +205,31 @@ public class StationServiceImpl implements StationService {
         throw new IllegalArgumentException("Invalid number format");
     }
 
+    //웨이포인트 리스트 기반 충전소 필터링
+    @Override
+    public List<StationDTO> findStationsNearWaypoints(List<LatLngDTO> waypoints, double radiusMeters ) {
+        List<StationDTO> result = new ArrayList<>();
+        allStationsDBUtil.loadStationsFromDB();
+        Map<String, StationDTO> allStations = stationMemoryFromDBCache.getAll(); // 메모리 캐시에서 불러오기
+        System.out.println("💡 캐시에 올라간 충전소 수: " + allStations.size());
+
+        for (StationDTO station : allStations.values()) {
+            double stationLat = station.getLat();
+            double stationLng = station.getLng();
+
+            // 각 웨이포인트에 대해 거리 검사
+            for (LatLngDTO wp : waypoints) {
+                double waypointLat = wp.getLat();
+                double waypointLng = wp.getLng();
+
+                double distance = geoUtil.calcDistance(waypointLat, waypointLng, stationLat, stationLng);
+                if (distance <= radiusMeters ) {
+                    result.add(station);
+                    break; // 한 웨이포인트에라도 걸리면 추가 후 다음 충전소로
+                }
+            }
+        }
+
+        return result;
+    }
 } // class

@@ -9,4 +9,64 @@
         SELECT zscode FROM zscode_mapping WHERE sigungu_name = #{sigunguName} AND zcode =#{zcode}
     </select>
 
+    <select id="getAllZscode" resultType="String">
+        select zscode from zscode_mapping
+    </select>
+
+
+
+
+    <insert id="insertOrUpdateStation" parameterType="com.highfive.chajiserver.dto.StationDTO">
+        INSERT INTO all_stations (
+            stat_id, chger_id, stat_nm, chger_type, addr, addr_detail, location,
+            use_time, lat, lng, busi_id, bnm, busi_nm, busi_call, stat,
+            stat_upd_dt, last_tsdt, last_tedt, now_tsdt, power_type, output,
+            method, zcode, zscode, kind, kind_detail, parking_free, note,
+            limit_yn, limit_detail, del_yn, del_detail, traffic_yn, year
+        ) VALUES (
+                     #{statId}, #{chgerId}, #{statNm}, #{chgerType}, #{addr}, #{addrDetail}, #{location},
+                     #{useTime}, #{lat}, #{lng}, #{busiId}, #{bnm}, #{busiNm}, #{busiCall}, #{stat},
+                     #{statUpdDt}, #{lastTsdt}, #{lastTedt}, #{nowTsdt}, #{powerType}, #{output},
+                     #{method}, #{zcode}, #{zscode}, #{kind}, #{kindDetail}, #{parkingFree}, #{note},
+                     #{limitYn}, #{limitDetail}, #{delYn}, #{delDetail}, #{trafficYn}, #{year}
+                 )
+            ON DUPLICATE KEY UPDATE
+                                 stat_nm = VALUES(stat_nm),
+                                 chger_type = VALUES(chger_type),
+                                 addr = VALUES(addr),
+                                 addr_detail = VALUES(addr_detail),
+                                 location = VALUES(location),
+                                 use_time = VALUES(use_time),
+                                 lat = VALUES(lat),
+                                 lng = VALUES(lng),
+                                 busi_id = VALUES(busi_id),
+                                 bnm = VALUES(bnm),
+                                 busi_nm = VALUES(busi_nm),
+                                 busi_call = VALUES(busi_call),
+                                 stat = VALUES(stat),
+                                 stat_upd_dt = VALUES(stat_upd_dt),
+                                 last_tsdt = VALUES(last_tsdt),
+                                 last_tedt = VALUES(last_tedt),
+                                 now_tsdt = VALUES(now_tsdt),
+                                 power_type = VALUES(power_type),
+                                 output = VALUES(output),
+                                 method = VALUES(method),
+                                 zcode = VALUES(zcode),
+                                 zscode = VALUES(zscode),
+                                 kind = VALUES(kind),
+                                 kind_detail = VALUES(kind_detail),
+                                 parking_free = VALUES(parking_free),
+                                 note = VALUES(note),
+                                 limit_yn = VALUES(limit_yn),
+                                 limit_detail = VALUES(limit_detail),
+                                 del_yn = VALUES(del_yn),
+                                 del_detail = VALUES(del_detail),
+                                 traffic_yn = VALUES(traffic_yn),
+                                 year = VALUES(year)
+    </insert>
+
+    <select id="getAllStationsFromDB" resultType="com.highfive.chajiserver.dto.StationDTO">
+        select * from all_stations
+    </select>
+
 </mapper>
