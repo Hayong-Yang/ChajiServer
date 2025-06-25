@@ -19,10 +19,7 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.util.AbstractMap;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -33,7 +30,6 @@ public class StationServiceImpl implements StationService {
     private final GeoUtil geoUtil;
     private final AllStationsDBUtil allStationsDBUtil;
     private final StationMemoryFromDBCache stationMemoryFromDBCache;
-
 
     @Override
     public void setStationNear(Map<String, Double> body) {
@@ -205,31 +201,99 @@ public class StationServiceImpl implements StationService {
         throw new IllegalArgumentException("Invalid number format");
     }
 
-    //웨이포인트 리스트 기반 충전소 필터링
-    @Override
-    public List<StationDTO> findStationsNearWaypoints(List<LatLngDTO> waypoints, double radiusMeters ) {
-        List<StationDTO> result = new ArrayList<>();
+    // 고속도로 필터링
+    private boolean shouldIncludeStation(StationDTO station, boolean highwayOnly) {
+        if (highwayOnly) {
+            try {
+                double output = Double.parseDouble(station.getOutput());
+                if (output < 50) return false; // 완속이면 제외
+            } catch (Exception e) {
+                return false; // 파싱 실패도 제외
+            }
+        }
+        return true;
+    }
+
+    // 웨이포인트 필터링
+    private List<StationDTO> filterStations(List<LatLngDTO> waypoints, double radiusMeters, boolean highwayOnly) {
         allStationsDBUtil.loadStationsFromDB();
-        Map<String, StationDTO> allStations = stationMemoryFromDBCache.getAll(); // 메모리 캐시에서 불러오기
-        System.out.println("💡 캐시에 올라간 충전소 수: " + allStations.size());
+        Map<String, StationDTO> allChargers = stationMemoryFromDBCache.getAll();
 
-        for (StationDTO station : allStations.values()) {
-            double stationLat = station.getLat();
-            double stationLng = station.getLng();
+        // 1. 고속도로 조건 충족하는 충전기만 필터링
+        List<StationDTO> filteredChargers = new ArrayList<>();
+        for (StationDTO charger : allChargers.values()) {
+            if (shouldIncludeStation(charger, highwayOnly)) {
+                filteredChargers.add(charger);
+            }
+        }
 
-            // 각 웨이포인트에 대해 거리 검사
-            for (LatLngDTO wp : waypoints) {
-                double waypointLat = wp.getLat();
-                double waypointLng = wp.getLng();
+        // 2. statId 기준으로 충전기 그룹화
+        Map<String, List<StationDTO>> groupedByStation = new HashMap<>();
+        for (StationDTO charger : filteredChargers) {
+            groupedByStation
+                    .computeIfAbsent(charger.getStatId(), k -> new ArrayList<>())
+                    .add(charger);
+        }
 
-                double distance = geoUtil.calcDistance(waypointLat, waypointLng, stationLat, stationLng);
-                if (distance <= radiusMeters ) {
-                    result.add(station);
-                    break; // 한 웨이포인트에라도 걸리면 추가 후 다음 충전소로
+        // 3. 각 충전소마다 대표 충전기 선정 (예: 출력값 높은 순)
+        List<StationDTO> representativeStations = new ArrayList<>();
+        for (List<StationDTO> chargers : groupedByStation.values()) {
+            chargers.sort((a, b) -> {
+                try {
+                    return Double.compare(
+                            Double.parseDouble(b.getOutput()),
+                            Double.parseDouble(a.getOutput())
+                    );
+                } catch (Exception e) {
+                    return 0;
                 }
+            });
+            representativeStations.add(chargers.get(0));
+        }
+
+        // 4. 웨이포인트 기준 반경 내에 있는 충전소만 선별
+//        List<StationDTO> result = new ArrayList<>();
+//        for (StationDTO station : representativeStations) {
+//            for (LatLngDTO wp : waypoints) {
+//                double distance = geoUtil.calcDistance(wp.getLat(), wp.getLng(), station.getLat(), station.getLng());
+//                if (distance <= radiusMeters) {
+//                    result.add(station);
+//                    break;
+//                }
+//            }
+//        }
+        int topN = 2; // 웨이포인트에서 거리 가까운 상위 2개 추출
+        List<StationDTO> result = new ArrayList<>();
+
+        for (LatLngDTO wp : waypoints) {
+            List<StationDTO> nearbyStations = new ArrayList<>();
+
+            for (StationDTO station : representativeStations) {
+                double distance = geoUtil.calcDistance(wp.getLat(), wp.getLng(), station.getLat(), station.getLng());
+                if (distance <= radiusMeters) {
+                    station.setDistance(distance); // StationDTO에 distance 필드가 있다고 가정
+                    nearbyStations.add(station);
+                }
+            }
+
+            // 거리순 정렬 후 상위 N개 추출
+            nearbyStations.sort(Comparator.comparingDouble(StationDTO::getDistance));
+            for (int i = 0; i < Math.min(topN, nearbyStations.size()); i++) {
+                result.add(nearbyStations.get(i));
             }
         }
 
         return result;
     }
+    // 고속도로 전용 - 웨이포인트 기반 충전소 호출 필터링
+    @Override
+    public List<StationDTO> HighStationsNearWaypoints(List<LatLngDTO> waypoints, double radiusMeters) {
+        return filterStations(waypoints, radiusMeters, true);
+    }
+    // 시내 포함 - 웨이포인트 기반 충전소 호출 필터링
+    @Override
+    public List<StationDTO> AllStationsNearWaypoints(List<LatLngDTO> waypoints, double radiusMeters) {
+        return filterStations(waypoints, radiusMeters, false);
+    }
+
 } // class

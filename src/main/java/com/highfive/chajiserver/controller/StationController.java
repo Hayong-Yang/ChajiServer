@@ -1,6 +1,7 @@
 package com.highfive.chajiserver.controller;
 
 import com.highfive.chajiserver.dto.LatLngDTO;
+import com.highfive.chajiserver.dto.RouteRequestDTO;
 import com.highfive.chajiserver.dto.StationDTO;
 import com.highfive.chajiserver.service.StationService;
 import lombok.RequiredArgsConstructor;
@@ -39,13 +40,21 @@ public class StationController {
     }
 
     @PostMapping("/getStationsNearWaypoints")
-    public ResponseEntity<List<StationDTO>> getStationsNearWaypoints(@RequestBody  List<LatLngDTO> waypoints) {
+    public ResponseEntity<List<StationDTO>> getStationsNearWaypoints(@RequestBody RouteRequestDTO request) {
         double radiusMeters  = 5000; // 10km: 10000
-        List<StationDTO> stations = service.findStationsNearWaypoints(waypoints, radiusMeters );
+        List<LatLngDTO> waypoints = request.getWaypoints();
+        boolean highway = request.isHighway();
+
+        List<StationDTO> stations;
+        if (highway) {
+            // 고속도로 경로: 급속 전용 충전소만
+            stations = service.HighStationsNearWaypoints(waypoints, radiusMeters);
+        } else {
+            // 도심 경로: 완속 포함
+            stations = service.AllStationsNearWaypoints(waypoints, radiusMeters);
+        }
         return ResponseEntity.ok(stations);
     }
-
-
 
 
 } // class
