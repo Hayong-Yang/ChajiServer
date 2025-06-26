@@ -3,6 +3,7 @@ package com.highfive.chajiserver.controller;
 import com.highfive.chajiserver.dto.LatLngDTO;
 import com.highfive.chajiserver.dto.RouteRequestDTO;
 import com.highfive.chajiserver.dto.StationDTO;
+import com.highfive.chajiserver.dto.StationFilterDTO;
 import com.highfive.chajiserver.service.StationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -41,17 +42,27 @@ public class StationController {
 
     @PostMapping("/getStationsNearWaypoints")
     public ResponseEntity<List<StationDTO>> getStationsNearWaypoints(@RequestBody RouteRequestDTO request) {
+        StationFilterDTO dto = new StationFilterDTO();
+
         double radiusMeters  = 5000; // 10km: 10000
         List<LatLngDTO> waypoints = request.getWaypoints();
         boolean highway = request.isHighway();
 
+        dto.setFreeParking(request.isFreeParking());
+        dto.setNoLimit(request.isNoLimit());
+        dto.setOutputMin(request.getOutputMin());
+        dto.setOutputMax(request.getOutputMax());
+        dto.setType(request.getType());
+        dto.setProvider(request.getProvider());
+        dto.setPriority(request.getPriority());
+
         List<StationDTO> stations;
         if (highway) {
             // 고속도로 경로: 급속 전용 충전소만
-            stations = service.HighStationsNearWaypoints(waypoints, radiusMeters);
+            stations = service.HighStationsNearWaypoints(waypoints, radiusMeters, dto);
         } else {
             // 도심 경로: 완속 포함
-            stations = service.AllStationsNearWaypoints(waypoints, radiusMeters);
+            stations = service.AllStationsNearWaypoints(waypoints, radiusMeters, dto);
         }
         return ResponseEntity.ok(stations);
     }
