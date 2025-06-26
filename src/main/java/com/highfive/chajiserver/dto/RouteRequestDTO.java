@@ -14,4 +14,11 @@ import java.util.List;
 public class RouteRequestDTO {
     private List<LatLngDTO> waypoints;
     private boolean highway;
+    private boolean freeParking;
+    private boolean noLimit;
+    private int outputMin = 0;
+    private int outputMax = 350;
+    private List<String> type;
+    private List<String> provider;
+    private String priority;
 }

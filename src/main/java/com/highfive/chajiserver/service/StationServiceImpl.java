@@ -5,6 +5,7 @@ import com.highfive.chajiserver.cache.StationCache;
 import com.highfive.chajiserver.cache.StationMemoryFromDBCache;
 import com.highfive.chajiserver.dto.LatLngDTO;
 import com.highfive.chajiserver.dto.StationDTO;
+import com.highfive.chajiserver.dto.StationFilterDTO;
 import com.highfive.chajiserver.util.AllStationsDBUtil;
 import com.highfive.chajiserver.util.ChargerApiUtil;
 import com.highfive.chajiserver.util.GeoUtil;
@@ -223,86 +224,166 @@ public class StationServiceImpl implements StationService {
         return true;
     }
 
-    // 웨이포인트 필터링
-    private List<StationDTO> filterStations(List<LatLngDTO> waypoints, double radiusMeters, boolean highwayOnly) {
+    // 🔁 웨이포인트 기반 충전소 필터링 핵심 로직
+    private List<StationDTO> filterStations(List<LatLngDTO> waypoints, double radiusMeters, boolean highwayOnly, StationFilterDTO filter) {
         allStationsDBUtil.loadStationsFromDB();
         Map<String, StationDTO> allChargers = stationMemoryFromDBCache.getAll();
 
-        // 1. 고속도로 조건 충족하는 충전기만 필터링
-        List<StationDTO> filteredChargers = new ArrayList<>();
-        for (StationDTO charger : allChargers.values()) {
-            if (shouldIncludeStation(charger, highwayOnly)) {
-                filteredChargers.add(charger);
-            }
-        }
+        boolean freeParking = filter.isFreeParking();
+        boolean noLimit = filter.isNoLimit();
+        int outputMin = filter.getOutputMin();
+        int outputMax = filter.getOutputMax();
+        String priority = filter.getPriority();
 
-        // 2. statId 기준으로 충전기 그룹화
+        List<String> typeList = Optional.ofNullable(filter.getType()).orElse(Collections.emptyList());
+        List<String> providerList = Optional.ofNullable(filter.getProvider()).orElse(Collections.emptyList());
+
+        List<StationDTO> filteredChargers = allChargers.values().stream()
+                .filter(c -> shouldIncludeStation(c, highwayOnly))
+                .filter(c -> !"Y".equalsIgnoreCase(c.getDelYn()))
+                .filter(c -> !freeParking || "Y".equalsIgnoreCase(c.getParkingFree()))
+                .filter(c -> !noLimit || (!"Y".equalsIgnoreCase(c.getLimitYn()) && (c.getNote() == null || !c.getNote().contains("이용 불가"))))
+                .filter(c -> {
+                    try {
+                        double o = Double.parseDouble(c.getOutput());
+                        return o >= outputMin && o <= outputMax;
+                    } catch (Exception e) {
+                        return false;
+                    }
+                })
+                .filter(c -> typeList.isEmpty() || typeList.contains(String.valueOf(c.getChgerType()).trim()))
+                .filter(c -> providerList.isEmpty() || providerList.contains(c.getBusiId()))
+                .toList();
+
         Map<String, List<StationDTO>> groupedByStation = new HashMap<>();
         for (StationDTO charger : filteredChargers) {
-            groupedByStation
-                    .computeIfAbsent(charger.getStatId(), k -> new ArrayList<>())
-                    .add(charger);
+            groupedByStation.computeIfAbsent(charger.getStatId(), k -> new ArrayList<>()).add(charger);
         }
 
-        // 3. 각 충전소마다 대표 충전기 선정 (예: 출력값 높은 순)
-        List<StationDTO> representativeStations = new ArrayList<>();
-        for (List<StationDTO> chargers : groupedByStation.values()) {
-            chargers.sort((a, b) -> {
-                try {
-                    return Double.compare(
-                            Double.parseDouble(b.getOutput()),
-                            Double.parseDouble(a.getOutput())
-                    );
-                } catch (Exception e) {
-                    return 0;
-                }
-            });
-            representativeStations.add(chargers.get(0));
-        }
-
-        // 4. 웨이포인트 기준 반경 내에 있는 충전소만 선별
-//        List<StationDTO> result = new ArrayList<>();
-//        for (StationDTO station : representativeStations) {
-//            for (LatLngDTO wp : waypoints) {
-//                double distance = geoUtil.calcDistance(wp.getLat(), wp.getLng(), station.getLat(), station.getLng());
-//                if (distance <= radiusMeters) {
-//                    result.add(station);
-//                    break;
-//                }
-//            }
-//        }
-        int topN = 2; // 웨이포인트에서 거리 가까운 상위 2개 추출
-        List<StationDTO> result = new ArrayList<>();
-
+        Map<LatLngDTO, List<StationDTO>> wpToTopStations = new LinkedHashMap<>();
         for (LatLngDTO wp : waypoints) {
-            List<StationDTO> nearbyStations = new ArrayList<>();
+            List<StationDTO> nearbyReps = new ArrayList<>();
 
-            for (StationDTO station : representativeStations) {
-                double distance = geoUtil.calcDistance(wp.getLat(), wp.getLng(), station.getLat(), station.getLng());
-                if (distance <= radiusMeters) {
-                    station.setDistance(distance); // StationDTO에 distance 필드가 있다고 가정
-                    nearbyStations.add(station);
+            for (List<StationDTO> chargers : groupedByStation.values()) {
+                chargers.sort(Comparator.comparingDouble(c -> -Double.parseDouble(c.getOutput())));
+                StationDTO rep = chargers.get(0);
+                double dist = geoUtil.calcDistance(wp.getLat(), wp.getLng(), rep.getLat(), rep.getLng());
+                if (dist <= radiusMeters) {
+                    rep.setDistance(dist);
+                    nearbyReps.add(rep);
                 }
             }
 
-            // 거리순 정렬 후 상위 N개 추출
-            nearbyStations.sort(Comparator.comparingDouble(StationDTO::getDistance));
-            for (int i = 0; i < Math.min(topN, nearbyStations.size()); i++) {
-                result.add(nearbyStations.get(i));
-            }
+            List<StationDTO> top5 = nearbyReps.stream()
+                    .sorted((a, b) -> Integer.compare(
+                            calculateWeightedSingleScore(b, priority),
+                            calculateWeightedSingleScore(a, priority)))
+                    .limit(5)
+                    .toList();
+
+            wpToTopStations.put(wp, top5);
+        }
+
+        int totalPoints = waypoints.size();
+        int segment = Math.max(1, totalPoints / 5);
+        Set<String>[] zones = new Set[]{new HashSet<>(), new HashSet<>(), new HashSet<>(), new HashSet<>(), new HashSet<>()};
+
+        for (int i = 0; i < totalPoints; i++) {
+            LatLngDTO wp = waypoints.get(i);
+            List<StationDTO> stations = wpToTopStations.getOrDefault(wp, new ArrayList<>());
+            int zoneIndex = Math.min(i / segment, 4);
+            for (StationDTO s : stations) zones[zoneIndex].add(s.getStatId());
+        }
+
+        List<StationDTO> result = new ArrayList<>();
+        for (Set<String> zone : zones) {
+            List<StationDTO> zoneList = zone.stream()
+                    .map(groupedByStation::get)
+                    .filter(Objects::nonNull)
+                    .map(list -> list.stream()
+                            .max(Comparator.comparingDouble(c -> safeParseOutput(c.getOutput())))
+                            .orElse(null))
+                    .filter(Objects::nonNull)
+                    .toList();
+
+            result.addAll(selectTopStationsByScore(zoneList, groupedByStation, 2, priority));
         }
 
         return result;
     }
+
+    private int calculateWeightedSingleScore(StationDTO rep, String priority) {
+        int speedScore = 0, reliabilityScore = 0, comfortScore = 0;
+        try {
+            double output = Double.parseDouble(rep.getOutput());
+            speedScore = output >= 200 ? 10 : output >= 100 ? 8 : output >= 50 ? 6 : output >= 7 ? 4 : 2;
+        } catch (Exception ignored) {}
+
+        if (rep.getStatUpdDt() != null && isWithinLast24Hours(rep.getStatUpdDt())) reliabilityScore += 3;
+        if ("Y".equalsIgnoreCase(rep.getParkingFree())) comfortScore += 2;
+        if ("Y".equalsIgnoreCase(rep.getTrafficYn())) comfortScore += 2;
+        if (rep.getUseTime() != null && rep.getUseTime().contains("24시간")) comfortScore += 3;
+
+        return switch (priority) {
+            case "speed" -> speedScore * 2 + reliabilityScore + comfortScore;
+            case "reliability" -> speedScore + reliabilityScore * 2 + comfortScore;
+            case "comfort" -> speedScore + reliabilityScore + comfortScore * 2;
+            default -> speedScore + reliabilityScore + comfortScore;
+        };
+    }
+
+    private int calculateWeightedStationScore(List<StationDTO> chargers, String priority) {
+        if (chargers == null || chargers.isEmpty()) return 0;
+        StationDTO rep = chargers.get(0);
+        int speedScore = 0, reliabilityScore = 0, comfortScore = 0;
+
+        try {
+            double output = Double.parseDouble(rep.getOutput());
+            speedScore = output >= 200 ? 10 : output >= 100 ? 8 : output >= 50 ? 6 : output >= 7 ? 4 : 2;
+        } catch (Exception ignored) {}
+
+        reliabilityScore += chargers.size();
+        if (rep.getStatUpdDt() != null && isWithinLast24Hours(rep.getStatUpdDt())) reliabilityScore += 3;
+
+        if ("Y".equalsIgnoreCase(rep.getParkingFree())) comfortScore += 2;
+        if ("Y".equalsIgnoreCase(rep.getTrafficYn())) comfortScore += 2;
+        if (rep.getUseTime() != null && rep.getUseTime().contains("24시간")) comfortScore += 3;
+
+        return switch (priority) {
+            case "speed" -> speedScore * 2 + reliabilityScore + comfortScore;
+            case "reliability" -> speedScore + reliabilityScore * 2 + comfortScore;
+            case "comfort" -> speedScore + reliabilityScore + comfortScore * 2;
+            default -> speedScore + reliabilityScore + comfortScore;
+        };
+    }
+
+    private List<StationDTO> selectTopStationsByScore(List<StationDTO> reps, Map<String, List<StationDTO>> grouped, int limit, String priority) {
+        return reps.stream()
+                .distinct()
+                .sorted((a, b) -> Integer.compare(
+                        calculateWeightedStationScore(grouped.get(b.getStatId()), priority),
+                        calculateWeightedStationScore(grouped.get(a.getStatId()), priority)))
+                .limit(limit)
+                .toList();
+    }
+
+    private double safeParseOutput(String output) {
+        try {
+            return Double.parseDouble(output);
+        } catch (Exception e) {
+            return 0.0;
+        }
+    }
+
     // 고속도로 전용 - 웨이포인트 기반 충전소 호출 필터링
     @Override
-    public List<StationDTO> HighStationsNearWaypoints(List<LatLngDTO> waypoints, double radiusMeters) {
-        return filterStations(waypoints, radiusMeters, true);
+    public List<StationDTO> HighStationsNearWaypoints(List<LatLngDTO> waypoints, double radiusMeters, StationFilterDTO filter) {
+        return filterStations(waypoints, radiusMeters, true, filter);
     }
     // 시내 포함 - 웨이포인트 기반 충전소 호출 필터링
     @Override
-    public List<StationDTO> AllStationsNearWaypoints(List<LatLngDTO> waypoints, double radiusMeters) {
-        return filterStations(waypoints, radiusMeters, false);
+    public List<StationDTO> AllStationsNearWaypoints(List<LatLngDTO> waypoints, double radiusMeters, StationFilterDTO filter) {
+        return filterStations(waypoints, radiusMeters, false, filter);
     }
 
 } // class
