@@ -28,6 +28,7 @@ public class ChargerApiUtil {
     // 현서 서비스 키
 //    private final static String urlEncoded = "NUqg9iZg%2BR57kpL1qrF1tst%2BAG3VXF5LAecO%2BCNKVMPmo34670TTUOan29Sq5DgB6%2FUXYTHmJOsUHoUp0CuKQw%3D%3D";
 
+
     public List<StationDTO> getStationsByZscode(String zscode) {
         List<StationDTO> result = new ArrayList<>();
         try {
