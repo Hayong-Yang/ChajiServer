@@ -5,6 +5,7 @@ import com.highfive.chajiserver.cache.StationCache;
 import com.highfive.chajiserver.cache.StationMemoryFromDBCache;
 import com.highfive.chajiserver.dto.LatLngDTO;
 import com.highfive.chajiserver.dto.StationDTO;
+import com.highfive.chajiserver.dto.StationFilterDTO;
 import com.highfive.chajiserver.util.AllStationsDBUtil;
 import com.highfive.chajiserver.util.ChargerApiUtil;
 import com.highfive.chajiserver.util.GeoUtil;
@@ -31,6 +32,7 @@ public class StationServiceImpl implements StationService {
     private final AllStationsDBUtil allStationsDBUtil;
     private final StationMemoryFromDBCache stationMemoryFromDBCache;
 
+    // [화면 위치 기반으로 주변 충전소를 공공 API로 불러와 전역 캐시에 저장]
     @Override
     public void setStationNear(Map<String, Double> body) {
         try {
@@ -49,7 +51,7 @@ public class StationServiceImpl implements StationService {
             e.printStackTrace();
         }
     }
-
+    // [화면 위치 기준 주변 충전소 필터링 후 추천 점수 기반 응답]
     @Override
     public ResponseEntity<?> getStationNear(Map<String, Object> body) {
         try {
@@ -88,6 +90,12 @@ public class StationServiceImpl implements StationService {
                         .body("[]");
             }
 
+            // 1. 필터 통과한 충전기 목록
+            List<StationDTO> passedList = new ArrayList<>();
+            // 개발 전용 정적 충전소 데이터
+            for (StationDTO station : stationMemoryFromDBCache.getAllValue()) {
+                // 실시간 데이터 전용!!!!!
+//            for (StationDTO station : stationCache.getAll()) {
             // 1. 필터 통과한 충전기 목록
             List<StationDTO> passedList = new ArrayList<>();
             for (StationDTO station : stationCache.getAll()) {
@@ -192,6 +200,7 @@ public class StationServiceImpl implements StationService {
         }
     }
 
+
     private boolean isWithinLast24Hours(String statUpdDt) {
         try {
             DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
@@ -222,42 +231,172 @@ public class StationServiceImpl implements StationService {
         return true;
     }
 
-    // 웨이포인트 필터링
-    private List<StationDTO> filterStations(List<LatLngDTO> waypoints, double radiusMeters, boolean highwayOnly) {
-        allStationsDBUtil.loadStationsFromDB();
+    // [ 웨이포인트 기반 충전소 필터링 핵심 로직]
+    private List<StationDTO> filterStations(List<LatLngDTO> waypoints, double radiusMeters, boolean highwayOnly, StationFilterDTO filter) {
+        // 1. DB에서 모든 충전소를 메모리로 로드_ 나중에 앱 실행될때 로드해두도록 바꿀것임
+//        allStationsDBUtil.loadStationsFromDB();
         Map<String, StationDTO> allChargers = stationMemoryFromDBCache.getAll();
 
-        // 1. 고속도로 조건 충족하는 충전기만 필터링
-        List<StationDTO> filteredChargers = new ArrayList<>();
-        for (StationDTO charger : allChargers.values()) {
-            if (shouldIncludeStation(charger, highwayOnly)) {
-                filteredChargers.add(charger);
-            }
-        }
+        // 2. 사용자 필터 조건 추출
+        boolean freeParking = filter.isFreeParking();
+        boolean noLimit = filter.isNoLimit();
+        int outputMin = filter.getOutputMin();
+        int outputMax = filter.getOutputMax();
+        String priority = filter.getPriority();
+        List<String> typeList = Optional.ofNullable(filter.getType()).orElse(Collections.emptyList());
+        List<String> providerList = Optional.ofNullable(filter.getProvider()).orElse(Collections.emptyList());
 
-        // 2. statId 기준으로 충전기 그룹화
+        // 3. 필터링: 조건에 맞는 충전기만 추출
+        List<StationDTO> filteredChargers = allChargers.values().stream()
+                .filter(c -> shouldIncludeStation(c, highwayOnly)) // 고속도로이면 급속만 허용
+                .filter(c -> !"Y".equalsIgnoreCase(c.getDelYn())) // 삭제된 충전기 제외
+                .filter(c -> !freeParking || "Y".equalsIgnoreCase(c.getParkingFree()))
+                .filter(c -> !noLimit || (!"Y".equalsIgnoreCase(c.getLimitYn()) && (c.getNote() == null || !c.getNote().contains("이용 불가"))))
+                .filter(c -> {
+                    try {
+                        double o = Double.parseDouble(c.getOutput());
+                        return o >= outputMin && o <= outputMax;
+                    } catch (Exception e) {
+                        return false;
+                    }
+                })
+                .filter(c -> typeList.isEmpty() || typeList.contains(String.valueOf(c.getChgerType()).trim()))
+                .filter(c -> providerList.isEmpty() || providerList.contains(c.getBusiId()))
+                .toList();
+
+        // 4. 충전소(statId)별로 그룹핑
         Map<String, List<StationDTO>> groupedByStation = new HashMap<>();
         for (StationDTO charger : filteredChargers) {
-            groupedByStation
-                    .computeIfAbsent(charger.getStatId(), k -> new ArrayList<>())
-                    .add(charger);
+            groupedByStation.computeIfAbsent(charger.getStatId(), k -> new ArrayList<>()).add(charger);
         }
 
-        // 3. 각 충전소마다 대표 충전기 선정 (예: 출력값 높은 순)
-        List<StationDTO> representativeStations = new ArrayList<>();
-        for (List<StationDTO> chargers : groupedByStation.values()) {
-            chargers.sort((a, b) -> {
-                try {
-                    return Double.compare(
-                            Double.parseDouble(b.getOutput()),
-                            Double.parseDouble(a.getOutput())
-                    );
-                } catch (Exception e) {
-                    return 0;
+        // 5. 웨이포인트마다 반경 내 대표 충전소 추출 (속도 기준으로 정렬)
+        Map<LatLngDTO, List<StationDTO>> wpToTopStations = new LinkedHashMap<>();
+        for (LatLngDTO wp : waypoints) {
+            List<StationDTO> nearbyReps = new ArrayList<>();
+
+            for (List<StationDTO> chargers : groupedByStation.values()) {
+                chargers.sort(Comparator.comparingDouble(c -> -Double.parseDouble(c.getOutput())));
+                StationDTO rep = chargers.get(0); // 대표 충전기
+                double dist = geoUtil.calcDistance(wp.getLat(), wp.getLng(), rep.getLat(), rep.getLng());
+                if (dist <= radiusMeters) {
+                    rep.setDistance(dist); // 거리 저장
+                    nearbyReps.add(rep);
                 }
-            });
-            representativeStations.add(chargers.get(0));
+            }
+            // 웨이포인트별 대표 충전소 중 상위 5개 추출 (사용자 선호 기반 점수순)
+            List<StationDTO> top5 = nearbyReps.stream()
+                    .sorted((a, b) -> Integer.compare(
+                            calculateWeightedSingleScore(b, priority),
+                            calculateWeightedSingleScore(a, priority)))
+                    .limit(5)
+                    .toList();
+
+            wpToTopStations.put(wp, top5);
         }
+
+        // 6. 웨이포인트 구간을 5개 영역(zone)으로 나누어 충전소 분배
+        int totalPoints = waypoints.size();
+        int segment = Math.max(1, totalPoints / 5);
+        Set<String>[] zones = new Set[]{new HashSet<>(), new HashSet<>(), new HashSet<>(), new HashSet<>(), new HashSet<>()};
+
+        for (int i = 0; i < totalPoints; i++) {
+            LatLngDTO wp = waypoints.get(i);
+            List<StationDTO> stations = wpToTopStations.getOrDefault(wp, new ArrayList<>());
+            int zoneIndex = Math.min(i / segment, 4);
+            for (StationDTO s : stations) zones[zoneIndex].add(s.getStatId());
+        }
+
+        // 7. 각 zone별 충전소 중 대표 충전소 선정 + 점수 높은 충전소 2개 추출
+        List<StationDTO> result = new ArrayList<>();
+        for (Set<String> zone : zones) {
+            List<StationDTO> zoneList = zone.stream()
+                    .map(groupedByStation::get) // 충전소 전체 리스트
+                    .filter(Objects::nonNull)
+                    .map(list -> list.stream()  // 해당 충전소 중 출력 높은 대표 1개
+                            .max(Comparator.comparingDouble(c -> safeParseOutput(c.getOutput())))
+                            .orElse(null))
+                    .filter(Objects::nonNull)
+                    .toList();
+            // zone별 상위 2개 충전소 추천
+            result.addAll(selectTopStationsByScore(zoneList, groupedByStation, 2, priority));
+        }
+
+//        // tmap 우회시간 판단 로직
+//        // zoneList는 현재 대표 충전소 목록 (1 zone당 5~10개 예상)
+//        List<StationDTO> evaluated = evaluateStationsByDetour(zoneList, start, end);
+//
+//        // evaluated에서 상위 N개 선택
+//        result.addAll(evaluated.subList(0, Math.min(2, evaluated.size())));
+
+        // 8. 전체 추천 충전소 반환
+        return result;
+    }
+
+    private int calculateWeightedSingleScore(StationDTO rep, String priority) {
+        int speedScore = 0, reliabilityScore = 0, comfortScore = 0;
+        try {
+            double output = Double.parseDouble(rep.getOutput());
+            speedScore = output >= 200 ? 6 : output >= 100 ? 5 : output >= 50 ? 4 : output >= 7 ? 2 : 1;
+        } catch (Exception ignored) {}
+
+        if (rep.getStatUpdDt() != null && isWithinLast24Hours(rep.getStatUpdDt())) reliabilityScore += 3;
+        if ("Y".equalsIgnoreCase(rep.getParkingFree())) comfortScore += 2;
+        if ("Y".equalsIgnoreCase(rep.getTrafficYn())) comfortScore += 2;
+        if (rep.getUseTime() != null && rep.getUseTime().contains("24시간")) comfortScore += 2;
+
+        return switch (priority) {
+            case "speed" -> speedScore * 2 + reliabilityScore + comfortScore;
+            case "reliability" -> speedScore + reliabilityScore * 2 + comfortScore;
+            case "comfort" -> speedScore + reliabilityScore + comfortScore * 2;
+            default -> speedScore + reliabilityScore + comfortScore;
+        };
+    }
+
+    private int calculateWeightedStationScore(List<StationDTO> chargers, String priority) {
+        if (chargers == null || chargers.isEmpty()) return 0;
+        StationDTO rep = chargers.get(0);
+        int speedScore = 0, reliabilityScore = 0, comfortScore = 0;
+
+        try {
+            double output = Double.parseDouble(rep.getOutput());
+            speedScore = output >= 200 ? 6 : output >= 100 ? 5 : output >= 50 ? 4 : output >= 7 ? 2 : 1;
+        } catch (Exception ignored) {}
+
+        int chargerCount = chargers.size();
+        int maxChargerThreshold = 15;
+        reliabilityScore += Math.min((chargerCount * 5) / maxChargerThreshold, 5);
+        if (rep.getStatUpdDt() != null && isWithinLast24Hours(rep.getStatUpdDt())) reliabilityScore += 2;
+
+        if ("Y".equalsIgnoreCase(rep.getParkingFree())) comfortScore += 2;
+        if ("Y".equalsIgnoreCase(rep.getTrafficYn())) comfortScore += 2;
+        if (rep.getUseTime() != null && rep.getUseTime().contains("24시간")) comfortScore += 3;
+
+        return switch (priority) {
+            case "speed" -> speedScore * 2 + reliabilityScore + comfortScore;
+            case "reliability" -> speedScore + reliabilityScore * 2 + comfortScore;
+            case "comfort" -> speedScore + reliabilityScore + comfortScore * 2;
+            default -> speedScore + reliabilityScore + comfortScore;
+        };
+    }
+
+    private List<StationDTO> selectTopStationsByScore(List<StationDTO> reps, Map<String, List<StationDTO>> grouped, int limit, String priority) {
+        return reps.stream()
+                .distinct()
+                .sorted((a, b) -> Integer.compare(
+                        calculateWeightedStationScore(grouped.get(b.getStatId()), priority),
+                        calculateWeightedStationScore(grouped.get(a.getStatId()), priority)))
+                .limit(limit)
+                .toList();
+    }
+
+    private double safeParseOutput(String output) {
+        try {
+            return Double.parseDouble(output);
+        } catch (Exception e) {
+            return 0.0;
+        }
+    }
 
         // 4. 웨이포인트 기준 반경 내에 있는 충전소만 선별
 //        List<StationDTO> result = new ArrayList<>();
@@ -295,13 +434,37 @@ public class StationServiceImpl implements StationService {
     }
     // 고속도로 전용 - 웨이포인트 기반 충전소 호출 필터링
     @Override
-    public List<StationDTO> HighStationsNearWaypoints(List<LatLngDTO> waypoints, double radiusMeters) {
-        return filterStations(waypoints, radiusMeters, true);
+    public List<StationDTO> HighStationsNearWaypoints(List<LatLngDTO> waypoints, double radiusMeters, StationFilterDTO filter) {
+        return filterStations(waypoints, radiusMeters, true, filter);
     }
     // 시내 포함 - 웨이포인트 기반 충전소 호출 필터링
     @Override
-    public List<StationDTO> AllStationsNearWaypoints(List<LatLngDTO> waypoints, double radiusMeters) {
-        return filterStations(waypoints, radiusMeters, false);
+    public List<StationDTO> AllStationsNearWaypoints(List<LatLngDTO> waypoints, double radiusMeters, StationFilterDTO filter) {
+        return filterStations(waypoints, radiusMeters, false, filter);
     }
+
+
+//    // tmap 우회부분
+//    private List<StationDTO> evaluateStationsByDetour(List<StationDTO> stations, LatLngDTO start, LatLngDTO end) {
+//        ExecutorService executor = Executors.newFixedThreadPool(5);
+//
+//        List<CompletableFuture<StationDTO>> futures = stations.stream()
+//                .map(station -> CompletableFuture.supplyAsync(() -> {
+//                    long delay = tmapUtil.getDetourTimeInSeconds(start, station.toLatLng(), end);
+//                    station.setTempScore((int) delay); // 단위: 초
+//                    return station;
+//                }, executor))
+//                .toList();
+//
+//        List<StationDTO> evaluated = futures.stream()
+//                .map(CompletableFuture::join)
+//                .filter(s -> s.getTempScore() > 0 && s.getTempScore() < 99999)
+//                .sorted(Comparator.comparingInt(StationDTO::getTempScore))
+//                .toList();
+//
+//        executor.shutdown(); // 리소스 정리
+//
+//        return evaluated;
+//    }
 
 } // class
