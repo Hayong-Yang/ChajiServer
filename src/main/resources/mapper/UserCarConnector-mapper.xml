@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.highfive.chajiserver.mapper.UserCarConnectorMapper">
+
+    <insert id="insertFromCarSpec" parameterType="map">
+        INSERT INTO user_car_connector (
+            user_car_idx,
+            ac_slow,
+            dc_combo,
+            dc_chademo,
+            ac_three_phase,
+            tesla,
+            mobile_plug,
+            wireless
+        )
+        SELECT
+            #{userCarIdx},
+            supports_ac_slow,
+            supports_dc_combo,
+            supports_dc_chademo,
+            supports_ac_three_phase,
+            supports_tesla,
+            supports_mobile_plug,
+            supports_wireless
+        FROM car_spec
+        WHERE car_idx = #{carIdx}
+    </insert>
+
+</mapper>

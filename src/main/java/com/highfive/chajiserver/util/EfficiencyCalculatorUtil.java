@@ -1,7 +1,7 @@
 package com.highfive.chajiserver.util;
 
-import com.highfive.chajiserver.dto.CarDTO;
-import com.highfive.chajiserver.mapper.CarMapper;
+import com.highfive.chajiserver.dto.CarSpecDTO;
+import com.highfive.chajiserver.mapper.CarSpecMapper;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
@@ -9,9 +9,9 @@ import java.time.LocalDate;
 @Component
 public class EfficiencyCalculatorUtil {
 
-    private final CarMapper carMapper;
+    private final CarSpecMapper carMapper;
 
-    public EfficiencyCalculatorUtil(CarMapper carMapper) {
+    public EfficiencyCalculatorUtil(CarSpecMapper carMapper) {
         this.carMapper = carMapper;
     }
 
@@ -20,12 +20,12 @@ public class EfficiencyCalculatorUtil {
                             double cityEvRatio, double highwayEvRatio,
                             double cityDistance, double highwayDistance, double totalTimeSeconds) {
 
-        CarDTO car = carMapper.findById(carIdx);
+        CarSpecDTO car = carMapper.findByCarIdx(carIdx);
         if (car == null) {
             throw new IllegalArgumentException("차량 정보 없음: " + carIdx);
         }
 
-        double baseEfficiency = car.getEfficiency();
+        double baseEfficiency = car.getEvEfficiency();
 
         int month = date.getMonthValue();
         int day = date.getDayOfMonth();

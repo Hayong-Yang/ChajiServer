@@ -5,6 +5,7 @@ import com.highfive.chajiserver.dto.MemberDTO;
 import com.highfive.chajiserver.jwt.JwtUtil;
 import com.highfive.chajiserver.service.MemberService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -31,6 +32,16 @@ public class MemberController {
             return ResponseEntity.ok().body(token);
         }else {
             return ResponseEntity.status(401).body("로그인 실패");
+        }
+    }
+
+    @GetMapping("/info")
+    public ResponseEntity<?> getUserInfo(@RequestHeader("Authorization") String token) {
+        MemberDTO member = service.getUserInfoFromToken(token);
+        if (member != null) {
+            return ResponseEntity.ok(member);
+        }else{
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("사용자를 찾을 수 없습니다.");
         }
     }
 

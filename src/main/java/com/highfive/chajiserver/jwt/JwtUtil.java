@@ -18,23 +18,23 @@ public class JwtUtil {
     private final long EXPIRATION = 1000 * 60 * 60;
     private final Key key = Keys.hmacShaKeyFor(SECRET.getBytes());
 
-    public String generateToken(String username, int userId) {
-        return Jwts.builder().setSubject(username)
-                .claim("id", userId)
+    public String generateToken(String userId, int userIdx) {
+        return Jwts.builder().setSubject(userId)
+                .claim("idx", userIdx)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION))
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
     }
 
-    //토큰에서 userName 추출
-    public String getUserNameFromToken(String token) {
+    //토큰에서 userId 추출
+    public String getUserIdFromToken(String token) {
         return parseClaims(token).getSubject();
     }
 
-    //토큰에서 userId 추출
-    public Integer getUserIdFromToken(String token) {
-        return parseClaims(token).get("id", Integer.class);
+    //토큰에서 userIdx 추출
+    public Integer getUserIdxFromToken(String token) {
+        return parseClaims(token).get("idx", Integer.class);
     }
 
     //토큰 유효성 검사
@@ -54,6 +54,26 @@ public class JwtUtil {
                 .build()
                 .parseClaimsJws(token)
                 .getBody();
+    }
+
+    //요청 헤더에서 토큰 추출 → userIdx 반환
+    public Integer getUserIdxFromRequest(HttpServletRequest request) {
+        String bearer = request.getHeader("Authorization");
+        if(bearer != null && bearer.startsWith("Bearer ")) {
+            String token = bearer.substring(7);
+            return getUserIdxFromToken(token);
+        }
+        throw new RuntimeException("토큰 에러!");
+    }
+
+    //요청 헤더에서 토큰 추출 → userId 반환 (NEW)
+    public String getUserIdFromRequest(HttpServletRequest request) {
+        String bearer = request.getHeader("Authorization");
+        if (bearer != null && bearer.startsWith("Bearer ")) {
+            String token = bearer.substring(7);
+            return getUserIdFromToken(token);
+        }
+        throw new RuntimeException("토큰 에러!");
     }
 
 

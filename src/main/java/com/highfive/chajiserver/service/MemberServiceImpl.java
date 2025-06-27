@@ -34,6 +34,17 @@ public class MemberServiceImpl implements MemberService{
     }
 
     @Override
+    public MemberDTO getUserInfoFromToken(String token) {
+        String jwt = token.replace("Bearer ", "");
+        String userId = jwtUtil.getUserIdFromToken(jwt);
+        MemberDTO member = mapper.findByUserId(userId);
+        if(member != null) {
+            member.setPassword(null);
+        }
+        return member;
+    }
+
+    @Override
     public void logout(String token) {
 
     }
