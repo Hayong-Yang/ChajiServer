@@ -6,6 +6,7 @@ import com.highfive.chajiserver.mapper.MapMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.util.Collection;
 import java.util.List;
 
 @Component
@@ -42,5 +43,8 @@ public class AllStationsDBUtil {
             totalSaved++;
         }
         return totalSaved;
+    }
+    public Collection<StationDTO> getAllStationsFromMemory() {
+        return memoryCache.getAll().values();
     }
 } // class

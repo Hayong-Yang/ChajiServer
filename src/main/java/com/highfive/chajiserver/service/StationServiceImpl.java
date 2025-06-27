@@ -53,11 +53,9 @@ public class StationServiceImpl implements StationService {
     @Override
     public ResponseEntity<?> getStationNear(Map<String, Object> body) {
         try {
-            // 안전하게 위.경도 받기
             double lat = extractDouble(body.get("lat"));
             double lon = extractDouble(body.get("lon"));
 
-            // ✅ 프론트에서 전달된 필터값 꺼내기 (기본값 처리 포함)
             boolean freeParking = Boolean.TRUE.equals(body.get("freeParking"));
             boolean noLimit = Boolean.TRUE.equals(body.get("noLimit"));
 
@@ -75,7 +73,6 @@ public class StationServiceImpl implements StationService {
                 typeList.add(body.get("type").toString());
             }
 
-            // outputMin/outputMax 필터값 받아오기 (없으면 기본값)
             int outputMin = 0;
             int outputMax = 350;
             if (body.get("outputMin") != null) {
@@ -85,18 +82,14 @@ public class StationServiceImpl implements StationService {
                 outputMax = Integer.parseInt(body.get("outputMax").toString());
             }
 
-            System.out.println("백에서 받은 좌표: " + lat + ", " + lon);
-
-            // 필터 조건 통과한 충전소만 담는 리스트
-            List<StationDTO> stationList = new ArrayList<>();
-
-            // 수정된 부분: 타입 또는 사업자 리스트가 비어있으면 아무 결과도 반환하지 않음
             if (typeList.isEmpty() || providerList.isEmpty()) {
                 return ResponseEntity.ok()
                         .header("Content-Type", "application/json; charset=UTF-8")
                         .body("[]");
             }
 
+            // 1. 필터 통과한 충전기 목록
+            List<StationDTO> passedList = new ArrayList<>();
             for (StationDTO station : stationCache.getAll()) {
                 if (!geoUtil.isWithinRadius(lat, lon, station.getLat(), station.getLng(), 1000)) continue;
                 if ("Y".equalsIgnoreCase(station.getDelYn())) continue;
@@ -110,16 +103,15 @@ public class StationServiceImpl implements StationService {
                 } catch (Exception ignore) {}
                 if (outputValue < outputMin || outputValue > outputMax) continue;
 
-                if (!typeList.isEmpty() && !typeList.contains(String.valueOf(station.getChgerType()).trim())) continue;
-                if (!providerList.isEmpty() && !providerList.contains(station.getBusiId())) continue;
+                if (!typeList.contains(String.valueOf(station.getChgerType()).trim())) continue;
+                if (!providerList.contains(station.getBusiId())) continue;
 
-                // ✅ 통과한 충전소만 리스트에 저장
-                stationList.add(station);
+                passedList.add(station);
             }
 
-            // ✅ 리스트에 담긴 충전소들만 점수 계산 및 정렬
+            // 2. 점수 부여
             List<Map.Entry<StationDTO, Integer>> scoredList = new ArrayList<>();
-            for (StationDTO station : stationList) {
+            for (StationDTO station : passedList) {
                 int score = 0;
                 if ("Y".equalsIgnoreCase(station.getParkingFree())) score += 15;
                 if ("Y".equalsIgnoreCase(station.getTrafficYn())) score += 10;
@@ -131,59 +123,68 @@ public class StationServiceImpl implements StationService {
                 scoredList.add(new AbstractMap.SimpleEntry<>(station, score));
             }
 
-            // 스코어 내림차순 정렬
-            scoredList.sort(Map.Entry.<StationDTO, Integer>comparingByValue().reversed());
-
-            // 3. 결과를 JSON으로 변환
-            JSONArray arr = new JSONArray();
+            // 3. statId로 그룹핑
+            Map<String, List<Map.Entry<StationDTO, Integer>>> grouped = new HashMap<>();
             for (Map.Entry<StationDTO, Integer> entry : scoredList) {
-                StationDTO station = entry.getKey();
-                int score         = entry.getValue();
+                StationDTO s = entry.getKey();
+                grouped.computeIfAbsent(s.getStatId(), k -> new ArrayList<>()).add(entry);
+            }
+
+            // 4. JSON 객체 리스트 생성
+            List<JSONObject> resultList = new ArrayList<>();
+            for (List<Map.Entry<StationDTO, Integer>> group : grouped.values()) {
+                StationDTO rep = group.get(0).getKey();
+                int score = group.get(0).getValue();
 
                 JSONObject obj = new JSONObject();
-                obj.put("statNm", station.getStatNm());
-                obj.put("statId", station.getStatId());
-                obj.put("chgerId", station.getChgerId());
-                obj.put("chgerType", station.getChgerType());
-                obj.put("addr", station.getAddr());
-                obj.put("addrDetail", station.getAddrDetail());
-                obj.put("location", station.getLocation());
-                obj.put("useTime", station.getUseTime());
-                obj.put("lat", station.getLat());
-                obj.put("lng", station.getLng());
-                obj.put("busiId", station.getBusiId());
-                obj.put("bnm", station.getBnm());
-                obj.put("busiNm", station.getBusiNm());
-                obj.put("busiCall", station.getBusiCall());
-                obj.put("stat", station.getStat());
-                obj.put("statUpdDt", station.getStatUpdDt());
-                obj.put("lastTsdt", station.getLastTsdt());
-                obj.put("lastTedt", station.getLastTedt());
-                obj.put("powerType", station.getPowerType());
-                obj.put("output", station.getOutput());
-                obj.put("method", station.getMethod());
-                obj.put("zcode", station.getZcode());
-                obj.put("zscode", station.getZscode());
-                obj.put("kind", station.getKind());
-                obj.put("kindDetail", station.getKindDetail());
-                obj.put("parkingFree", station.getParkingFree());
-                obj.put("note", station.getNote());
-                obj.put("limitYn", station.getLimitYn());
-                obj.put("limitDetail", station.getLimitDetail());
-                obj.put("delYn", station.getDelYn());
-                obj.put("delDetail", station.getDelDetail());
-                obj.put("trafficYn", station.getTrafficYn());
-                obj.put("year", station.getYear());
-                obj.put("logoUrl", CompanyLogoCache.getLogoUrl(station.getBusiId()));
-
+                obj.put("statNm", rep.getStatNm());
+                obj.put("statId", rep.getStatId());
+                obj.put("addr", rep.getAddr());
+                obj.put("lat", rep.getLat());
+                obj.put("lng", rep.getLng());
+                obj.put("busiId", rep.getBusiId());
+                obj.put("bnm", rep.getBnm());
+                obj.put("parkingFree", rep.getParkingFree());
                 obj.put("recommendScore", score);
+                obj.put("logoUrl", CompanyLogoCache.getLogoUrl(rep.getBusiId()));
+                obj.put("useTime", rep.getUseTime());
+
+                JSONArray chargers = new JSONArray();
+                for (Map.Entry<StationDTO, Integer> entry : group) {
+                    StationDTO chg = entry.getKey();
+                    JSONObject c = new JSONObject();
+                    c.put("chgerId", chg.getChgerId());
+                    c.put("chgerType", chg.getChgerType());
+                    c.put("stat", chg.getStat());
+                    c.put("statUpdDt", chg.getStatUpdDt());
+                    c.put("method", chg.getMethod());
+                    c.put("output", chg.getOutput());
+                    c.put("powerType", chg.getPowerType());
+                    c.put("useTime", chg.getUseTime());
+                    c.put("lastTsdt", chg.getLastTsdt());
+                    c.put("lastTedt", chg.getLastTedt());
+                    c.put("nowTsdt", chg.getNowTsdt());
+                    chargers.put(c);
+                }
+
+                obj.put("chargers", chargers);
+                resultList.add(obj);
+            }
+
+            // 5. 추천 점수 기준으로 내림차순 정렬
+            resultList.sort((a, b) ->
+                    Integer.compare(b.getInt("recommendScore"), a.getInt("recommendScore"))
+            );
+
+            // 6. JSONArray로 변환
+            JSONArray arr = new JSONArray();
+            for (JSONObject obj : resultList) {
                 arr.put(obj);
             }
 
             return ResponseEntity.ok()
                     .header("Content-Type", "application/json; charset=UTF-8")
                     .body(arr.toString());
-
 
         } catch (Exception e) {
             e.printStackTrace();

@@ -68,5 +68,15 @@
     <select id="getAllStationsFromDB" resultType="com.highfive.chajiserver.dto.StationDTO">
         select * from all_stations
     </select>
+    <select id="getSigunguMap" resultType="map">
+        SELECT zscode AS `key`, sigungu_name AS `value`
+        FROM zscode_mapping
+    </select>
+
+    <!-- 📌 zcode → 시도명 -->
+    <select id="getSidoMap" resultType="map">
+        SELECT zcode AS `key`, sido_name AS `value`
+        FROM sido_mapping
+    </select>
 
 </mapper>
