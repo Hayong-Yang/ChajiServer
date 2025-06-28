@@ -66,16 +66,6 @@ public class JwtUtil {
         throw new RuntimeException("토큰 에러!");
     }
 
-    //요청 헤더에서 토큰 추출 → userId 반환 (NEW)
-    public String getUserIdFromRequest(HttpServletRequest request) {
-        String bearer = request.getHeader("Authorization");
-        if (bearer != null && bearer.startsWith("Bearer ")) {
-            String token = bearer.substring(7);
-            return getUserIdFromToken(token);
-        }
-        throw new RuntimeException("토큰 에러!");
-    }
-
 
 }
 
