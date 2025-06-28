@@ -153,6 +153,8 @@ public class StationServiceImpl implements StationService {
                 obj.put("recommendScore", score);
                 obj.put("logoUrl", CompanyLogoCache.getLogoUrl(rep.getBusiId()));
                 obj.put("useTime", rep.getUseTime());
+                obj.put("busiCall", rep.getBusiCall());
+                obj.put("limitDetail", rep.getLimitDetail());
 
                 JSONArray chargers = new JSONArray();
                 for (Map.Entry<StationDTO, Integer> entry : group) {
