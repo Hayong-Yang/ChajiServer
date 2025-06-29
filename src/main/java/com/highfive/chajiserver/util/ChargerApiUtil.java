@@ -20,7 +20,7 @@ import java.util.List;
 public class ChargerApiUtil {
 
     // 하용 서비스 키
-//    private final static String urlEncoded = "Wq%2BLPbmdYSbixCNUPkPm%2B3vWdEP6EHCS%2Fx%2FUNPAejzZCAlbDERkA7NZG3aqfORfDOT9cc1Sa7KgaXrpIzaaNAQ%3D%3D";
+    private final static String urlEncoded = "Wq%2BLPbmdYSbixCNUPkPm%2B3vWdEP6EHCS%2Fx%2FUNPAejzZCAlbDERkA7NZG3aqfORfDOT9cc1Sa7KgaXrpIzaaNAQ%3D%3D";
     // 동현 서비스 키
 //    private final static String urlEncoded = "fy5BXzZbOlT5f8Rm%2FvV7CSbFwdw2WNrfeE5oJcOl%2Ffj6QY3vOzoIhLzhftkVLtK415OcxJVXkpJPurYA%2F%2FWTwg%3D%3D";
     // 혜진 서비스 키
@@ -28,7 +28,7 @@ public class ChargerApiUtil {
     // 현서 서비스 키
 //    private final static String urlEncoded = "NUqg9iZg%2BR57kpL1qrF1tst%2BAG3VXF5LAecO%2BCNKVMPmo34670TTUOan29Sq5DgB6%2FUXYTHmJOsUHoUp0CuKQw%3D%3D";
     // 솔비 서비스 키
-    private final static String urlEncoded = "Fd9vStrV5WKcvb5kTCXeBBw1zyOOxNrOysX80lQ02PLaIWqI7PFfY7PlcJopX%2F3kd5FYkiHYt6QYbhItGuhIhQ%3D%3D";
+//    private final static String urlEncoded = "Fd9vStrV5WKcvb5kTCXeBBw1zyOOxNrOysX80lQ02PLaIWqI7PFfY7PlcJopX%2F3kd5FYkiHYt6QYbhItGuhIhQ%3D%3D";
     // 광주 서비스 키
 //    private final static String urlEncoded = "68byioDNf5NjuT4jEQUjBX4P%2FLanyTVSOo0PUtfJC6MEAKVzgDplnUlHcmfxQFDR8UAPZUv9hfacQucB7Wr%2Ffg%3D%3D";
 
