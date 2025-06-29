@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.highfive.chajiserver.mapper.RoamingPriceMapper">
+
+    <select id="getFeeInfo" resultType="com.highfive.chajiserver.dto.RoamingPriceDTO">
+        SELECT *
+        FROM roaming_price
+        WHERE member_company = #{memberCompany}
+          AND operator_code = #{operatorCode}
+            LIMIT 1
+    </select>
+
+</mapper>
