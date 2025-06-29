@@ -24,9 +24,13 @@ public class ChargerApiUtil {
     // 동현 서비스 키
 //    private final static String urlEncoded = "fy5BXzZbOlT5f8Rm%2FvV7CSbFwdw2WNrfeE5oJcOl%2Ffj6QY3vOzoIhLzhftkVLtK415OcxJVXkpJPurYA%2F%2FWTwg%3D%3D";
     // 혜진 서비스 키
-    private final static String urlEncoded = "5fh1iyaZ1J7cmI8j1rYxs8gqu38xTrq7tfhweTdERepTeyYpeyqRArG1Ja1re0szzkXY%2B%2Fu%2BeObGbhZ6f%2B41mg%3D%3D";
+//    private final static String urlEncoded = "5fh1iyaZ1J7cmI8j1rYxs8gqu38xTrq7tfhweTdERepTeyYpeyqRArG1Ja1re0szzkXY%2B%2Fu%2BeObGbhZ6f%2B41mg%3D%3D";
     // 현서 서비스 키
 //    private final static String urlEncoded = "NUqg9iZg%2BR57kpL1qrF1tst%2BAG3VXF5LAecO%2BCNKVMPmo34670TTUOan29Sq5DgB6%2FUXYTHmJOsUHoUp0CuKQw%3D%3D";
+    // 솔비 서비스 키
+    private final static String urlEncoded = "Fd9vStrV5WKcvb5kTCXeBBw1zyOOxNrOysX80lQ02PLaIWqI7PFfY7PlcJopX%2F3kd5FYkiHYt6QYbhItGuhIhQ%3D%3D";
+    // 광주 서비스 키
+//    private final static String urlEncoded = "68byioDNf5NjuT4jEQUjBX4P%2FLanyTVSOo0PUtfJC6MEAKVzgDplnUlHcmfxQFDR8UAPZUv9hfacQucB7Wr%2Ffg%3D%3D";
 
 
     public List<StationDTO> getStationsByZscode(String zscode) {

@@ -31,8 +31,8 @@ public class TmapUtil {
     // 기본 경로 요청 (start → end) or (start → waypoint → end)
     public long getRouteTimeInSeconds(LatLngDTO... points) {
         // Tmap API 요청 URL 구성
-        String url = "https://apis.openapi.sk.com/tmap/routes/routeSequential30?version=1";
-        String appKey = "발급받은_TMAP_API_KEY"; // 환경변수로 관리 권장
+        String url = "https://apis.openapi.sk.com/tmap/routes?version=1&format=json";
+        String appKey = "rzCNpiuhIX5l0dwT9rvQ93GRc22mFn6baRSvJYFl"; // 환경변수로 옮기기
 
         // 요청 바디 구성
         String body = buildTmapRequestBody(points);
