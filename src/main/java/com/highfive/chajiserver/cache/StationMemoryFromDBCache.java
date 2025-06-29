@@ -3,6 +3,7 @@ package com.highfive.chajiserver.cache;
 import com.highfive.chajiserver.dto.StationDTO;
 import org.springframework.stereotype.Component;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,6 +23,10 @@ public class StationMemoryFromDBCache {
 
     public Map<String, StationDTO> getAll() {
         return cache;
+    }
+
+    public Collection<StationDTO> getAllValue() {
+        return cache.values();
     }
 
     public void clear() {
