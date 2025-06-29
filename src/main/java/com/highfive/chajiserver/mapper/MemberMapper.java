@@ -8,4 +8,5 @@ import org.apache.ibatis.annotations.Param;
 public interface MemberMapper {
     void save(MemberDTO member);
     MemberDTO findByUserId(@Param("userId") String userId);
+    void update(MemberDTO member);
 }
