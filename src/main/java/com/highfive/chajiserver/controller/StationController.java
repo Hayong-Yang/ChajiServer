@@ -46,6 +46,7 @@ public class StationController {
         StationFilterDTO dto = new StationFilterDTO();
 
         double radiusMeters  = 5000; // 10km: 10000
+        double totalDistanceKm = request.getDistance();
         List<LatLngDTO> waypoints = request.getWaypoints();
         boolean highway = request.isHighway();
 
@@ -58,7 +59,11 @@ public class StationController {
         dto.setPriority(request.getPriority());
 
         List<StationDTO> stations;
-        if (highway) {
+        if (totalDistanceKm < 5.0 && request.getOrigin() != null && request.getDest() != null) {
+            // 짧은 거리: 출발지와 목적지만 웨이포인트로 넣음
+            List<LatLngDTO> simpleWaypoints = List.of(request.getOrigin(), request.getDest());
+            stations = service.AllStationsNearWaypoints(simpleWaypoints, 2000, dto); // 반경 2km
+        } else if (highway) {
             // 고속도로 경로: 급속 전용 충전소만
             stations = service.HighStationsNearWaypoints(waypoints, radiusMeters, dto);
         } else {
