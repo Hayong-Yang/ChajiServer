@@ -70,6 +70,22 @@ public class CompanyLogoCache {
         logoMap.put("FT", "/img/logos/FT.png");          // 포티투닷
         logoMap.put("G1", "/img/logos/G1.png");          // 광주시
         logoMap.put("G2", "/img/logos/G2.png");          // 광주시
+        logoMap.put("GD", "/img/logos/GD.png");          // 그린도트
+        logoMap.put("GE", "/img/logos/GE.png");          // 그린전력
+        logoMap.put("GG", "/img/logos/GG.png");          // 강진군
+        logoMap.put("GN", "/img/logos/GN.png");          // 지에스커넥트
+        logoMap.put("GO", "/img/logos/GO.png");          // 유한회사 골드에너지
+        logoMap.put("GP", "/img/logos/GP.png");          // 군포시
+        logoMap.put("PM", "/img/logos/PM.png");          // 파라인모터스
+        logoMap.put("PS", "/img/logos/PS.png");          // 이브이파킹서비스
+        logoMap.put("PW", "/img/logos/PW.png");          // 파워큐브
+        logoMap.put("RE", "/img/logos/RE.png");          // 레드이엔지
+        logoMap.put("RS", "/img/logos/RS.png");          // 리셀파워
+        logoMap.put("S1", "/img/logos/S1.png");          // 에스이피
+        logoMap.put("SA", "/img/logos/SA.png");          // 설악에너텍
+        logoMap.put("SB", "/img/logos/SB.png");          // 소프트베리
+        logoMap.put("SC", "/img/logos/SC.png");          // 삼척시
+        logoMap.put("SD", "/img/logos/SD.png");          // 스칼라데이터
 
         // ... ⚠️ 나머지 코드는 필요 시 계속 추가
 
