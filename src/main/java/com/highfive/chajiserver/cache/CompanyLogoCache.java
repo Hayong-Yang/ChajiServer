@@ -48,6 +48,29 @@ public class CompanyLogoCache {
         logoMap.put("DO", "/img/logos/dahansong.png");   // 대한송유관공사
         logoMap.put("DP", "/img/logos/dau.png");         // 대유플러스
         logoMap.put("DR", "/img/logos/duruscob.png");    // 두루스코이브이
+        logoMap.put("DS", "/img/logos/DS.png");          // 대선==
+        logoMap.put("DY", "/img/logos/DY.png");          // 동양이엔피
+        logoMap.put("E0", "/img/logos/EO.png");          // 에너지플러스
+        logoMap.put("EA", "/img/logos/EA.png");          // 에바
+        logoMap.put("EB", "/img/logos/EB.png");          // 일렉트리
+        logoMap.put("EC", "/img/logos/EC.png");          // 이지차저
+        logoMap.put("EE", "/img/logos/EE.png");          // 이마트
+        logoMap.put("EG", "/img/logos/EG.png");          // 에너지파트너즈
+        logoMap.put("EH", "/img/logos/EH.png");          // 이앤에이치에너지
+        logoMap.put("EK", "/img/logos/EK.png");          // 엔라이튼
+        logoMap.put("EM", "/img/logos/EM.png");          // evmost ==
+        logoMap.put("EN", "/img/logos/EN.png");          // 이엔
+        logoMap.put("EO", "/img/logos/E0.png");          // E1
+        logoMap.put("EP", "/img/logos/EP.png");          // 이카플러그
+        logoMap.put("ER", "/img/logos/ER.png");          // 이엘일렉트릭
+        logoMap.put("ES", "/img/logos/ES.png");          // 이테스
+        logoMap.put("ET", "/img/logos/ET.png");          // 이씨티
+        logoMap.put("EZ", "/img/logos/EZ.png");          // 차지인
+        logoMap.put("FE", "/img/logos/FE.png");          // 에프이씨 ==
+        logoMap.put("FT", "/img/logos/FT.png");          // 포티투닷
+        logoMap.put("G1", "/img/logos/G1.png");          // 광주시
+        logoMap.put("G2", "/img/logos/G2.png");          // 광주시
+
         // ... ⚠️ 나머지 코드는 필요 시 계속 추가
     }
 
