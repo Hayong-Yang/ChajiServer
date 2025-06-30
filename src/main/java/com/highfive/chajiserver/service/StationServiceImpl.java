@@ -51,12 +51,15 @@ public class StationServiceImpl implements StationService {
             e.printStackTrace();
         }
     }
+
     // [화면 위치 기준 주변 충전소 필터링 후 추천 점수 기반 응답]
     @Override
     public ResponseEntity<?> getStationNear(Map<String, Object> body) {
         try {
             double lat = extractDouble(body.get("lat"));
             double lon = extractDouble(body.get("lon"));
+
+            System.out.println("✅ 위도: " + lat + ", 경도: " + lon);
 
             boolean freeParking = Boolean.TRUE.equals(body.get("freeParking"));
             boolean noLimit = Boolean.TRUE.equals(body.get("noLimit"));
@@ -74,6 +77,7 @@ public class StationServiceImpl implements StationService {
             } else if (body.get("type") instanceof String) {
                 typeList.add(body.get("type").toString());
             }
+
 
             int outputMin = 0;
             int outputMax = 350;
@@ -93,9 +97,10 @@ public class StationServiceImpl implements StationService {
             // 1. 필터 통과한 충전기 목록
             List<StationDTO> passedList = new ArrayList<>();
             // 개발 전용 정적 충전소 데이터
-            for (StationDTO station : stationMemoryFromDBCache.getAllValue()) {
-                // 실시간 데이터 전용!!!!!
-//            for (StationDTO station : stationCache.getAll()) {
+//            for (StationDTO station : stationMemoryFromDBCache.getAllValue()) {
+            // 실시간 데이터 전용!!!!!
+            for (StationDTO station : stationCache.getAll()) {
+
                 if (!geoUtil.isWithinRadius(lat, lon, station.getLat(), station.getLng(), 1000)) continue;
                 if ("Y".equalsIgnoreCase(station.getDelYn())) continue;
                 if (freeParking && !"Y".equalsIgnoreCase(station.getParkingFree())) continue;
@@ -105,7 +110,8 @@ public class StationServiceImpl implements StationService {
                 double outputValue = 0;
                 try {
                     outputValue = Double.parseDouble(station.getOutput().toString());
-                } catch (Exception ignore) {}
+                } catch (Exception ignore) {
+                }
                 if (outputValue < outputMin || outputValue > outputMax) continue;
 
                 if (!typeList.contains(String.valueOf(station.getChgerType()).trim())) continue;
@@ -356,7 +362,8 @@ public class StationServiceImpl implements StationService {
         try {
             double output = Double.parseDouble(rep.getOutput());
             speedScore = output >= 200 ? 6 : output >= 100 ? 5 : output >= 50 ? 4 : output >= 7 ? 2 : 1;
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+        }
 
         if (rep.getStatUpdDt() != null && isWithinLast24Hours(rep.getStatUpdDt())) reliabilityScore += 3;
         if ("Y".equalsIgnoreCase(rep.getParkingFree())) comfortScore += 2;
@@ -379,7 +386,8 @@ public class StationServiceImpl implements StationService {
         try {
             double output = Double.parseDouble(rep.getOutput());
             speedScore = output >= 200 ? 6 : output >= 100 ? 5 : output >= 50 ? 4 : output >= 7 ? 2 : 1;
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+        }
 
         int chargerCount = chargers.size();
         int maxChargerThreshold = 15;
@@ -421,10 +429,10 @@ public class StationServiceImpl implements StationService {
     public List<StationDTO> HighStationsNearWaypoints(List<LatLngDTO> waypoints, double radiusMeters, StationFilterDTO filter) {
         return filterStations(waypoints, radiusMeters, true, filter);
     }
+
     // 시내 포함 - 웨이포인트 기반 충전소 호출 필터링
     @Override
     public List<StationDTO> AllStationsNearWaypoints(List<LatLngDTO> waypoints, double radiusMeters, StationFilterDTO filter) {
         return filterStations(waypoints, radiusMeters, false, filter);
     }
-
-} // class
+}

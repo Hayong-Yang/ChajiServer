@@ -4,12 +4,15 @@ import com.highfive.chajiserver.cache.StationMemoryFromDBCache;
 import com.highfive.chajiserver.dto.StationDTO;
 import com.highfive.chajiserver.mapper.MapMapper;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+import java.util.Collection;
 import java.util.List;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class AllStationsDBUtil {
     private final MapMapper mapper;
     private final ChargerApiUtil chargerApiUtil;
@@ -21,6 +24,7 @@ public class AllStationsDBUtil {
         System.out.println("📦 DB에서 불러온 충전소 개수: " + list.size());
         memoryCache.putAll(list);
         System.out.println("✅ 메모리에 저장된 수: " + memoryCache.getAll().size());
+        log.info("🔍 AllStationsDBUtil memoryCache 인스턴스: {}", System.identityHashCode(memoryCache));
     }
 
     public int fetchAndStoreAllStations() {
@@ -42,5 +46,8 @@ public class AllStationsDBUtil {
             totalSaved++;
         }
         return totalSaved;
+    }
+    public Collection<StationDTO> getAllStationsFromMemory() {
+        return memoryCache.getAll().values();
     }
 } // class
