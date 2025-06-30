@@ -100,6 +100,7 @@ public class StationServiceImpl implements StationService {
             for (StationDTO station : stationMemoryFromDBCache.getAllValue()) {
             // 실시간 데이터 전용!!!!!
 //            for (StationDTO station : stationCache.getAll()) {
+
                 if (!geoUtil.isWithinRadius(lat, lon, station.getLat(), station.getLng(), 1000)) continue;
                 if ("Y".equalsIgnoreCase(station.getDelYn())) continue;
                 if (freeParking && !"Y".equalsIgnoreCase(station.getParkingFree())) continue;
