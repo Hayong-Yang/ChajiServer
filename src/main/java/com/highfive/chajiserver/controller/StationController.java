@@ -31,15 +31,15 @@ public class StationController {
         }
     }
 
-    @PostMapping("getStationNear")
-    public ResponseEntity<?> getStationNear(@RequestBody Map<String, Object> body) {
-        try{
-           return service.getStationNear(body);
-        }catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.status(500).body("getStationNear 오류 발생");
+        @PostMapping("getStationNear")
+        public ResponseEntity<?> getStationNear(@RequestBody Map<String, Object> body) {
+            try{
+               return service.getStationNear(body);
+            }catch (Exception e) {
+                e.printStackTrace();
+                return ResponseEntity.status(500).body("getStationNear 오류 발생");
+            }
         }
-    }
 
     @PostMapping("/getStationsNearWaypoints")
     public ResponseEntity<List<StationDTO>> getStationsNearWaypoints(@RequestBody RouteRequestDTO request) {
