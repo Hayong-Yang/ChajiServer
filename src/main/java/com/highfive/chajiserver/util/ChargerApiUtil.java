@@ -25,7 +25,7 @@ public class ChargerApiUtil {
     // 하용 서비스 키
     private final static String urlEncoded = "Wq%2BLPbmdYSbixCNUPkPm%2B3vWdEP6EHCS%2Fx%2FUNPAejzZCAlbDERkA7NZG3aqfORfDOT9cc1Sa7KgaXrpIzaaNAQ%3D%3D";
     // 동현 서비스 키
-    private final static String urlEncoded = "fy5BXzZbOlT5f8Rm%2FvV7CSbFwdw2WNrfeE5oJcOl%2Ffj6QY3vOzoIhLzhftkVLtK415OcxJVXkpJPurYA%2F%2FWTwg%3D%3D";
+//    private final static String urlEncoded = "fy5BXzZbOlT5f8Rm%2FvV7CSbFwdw2WNrfeE5oJcOl%2Ffj6QY3vOzoIhLzhftkVLtK415OcxJVXkpJPurYA%2F%2FWTwg%3D%3D";
     // 혜진 서비스 키
 //    private final static String urlEncoded = "5fh1iyaZ1J7cmI8j1rYxs8gqu38xTrq7tfhweTdERepTeyYpeyqRArG1Ja1re0szzkXY%2B%2Fu%2BeObGbhZ6f%2B41mg%3D%3D";
     // 현서 서비스 키
