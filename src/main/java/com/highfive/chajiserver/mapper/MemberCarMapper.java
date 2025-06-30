@@ -28,13 +28,13 @@ public interface MemberCarMapper {
     );
 
     // 등록된 차량 리스트
-    List<MemberCar> selectMemberCars(int memberIdx);
+    List<MemberCarDTO> selectMemberCars(int memberIdx);
 
     // 등록된 차량 수 (대표 여부 판단용)
     int countByMemberIdx(int memberIdx);
 
     // member_car 테이블 insert
-    void insertMemberCar(MemberCar memberCar);
+    void insertMemberCar(MemberCarDTO memberCar);
 
     void deleteMemberCar(int idx);
 

@@ -40,9 +40,9 @@ public class MemberCarController {
     }
 
     @GetMapping("/list")
-    public ResponseEntity<List<MemberCar>> getMemberCars(HttpServletRequest request) {
+    public ResponseEntity<List<MemberCarDTO>> getMemberCars(HttpServletRequest request) {
         int memberIdx = jwtUtil.getUserIdxFromRequest(request);
-        List<MemberCar> carList = memberCarService.getMemberCars(memberIdx);
+        List<MemberCarDTO> carList = memberCarService.getMemberCars(memberIdx);
         return ResponseEntity.ok(carList);
     }
 
