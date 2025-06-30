@@ -13,9 +13,6 @@
         select zscode from zscode_mapping
     </select>
 
-
-
-
     <insert id="insertOrUpdateStation" parameterType="com.highfive.chajiserver.dto.StationDTO">
         INSERT INTO all_stations (
             stat_id, chger_id, stat_nm, chger_type, addr, addr_detail, location,
@@ -68,15 +65,80 @@
     <select id="getAllStationsFromDB" resultType="com.highfive.chajiserver.dto.StationDTO">
         select * from all_stations
     </select>
+
     <select id="getSigunguMap" resultType="map">
         SELECT zscode AS `key`, sigungu_name AS `value`
         FROM zscode_mapping
     </select>
 
-    <!-- 📌 zcode → 시도명 -->
-    <select id="getSidoMap" resultType="map">
-        SELECT zcode AS `key`, sido_name AS `value`
-        FROM sido_mapping
+    <!-- ✅ 시군구 이름 + 대표 좌표 (AVG lat/lon) -->
+    <select id="getSigunguMapWithCoord" resultType="map">
+        SELECT
+            zs.zscode AS `key`,
+            zm.sigungu_name AS `value`,
+            AVG(zs.lat) AS lat,
+            AVG(zs.lng) AS lng
+        FROM all_stations zs
+                 JOIN zscode_mapping zm ON zs.zscode = zm.zscode
+        GROUP BY zs.zscode, zm.sigungu_name
     </select>
 
+    <!-- ✅ 시도 이름 전용 (key: zcode, value: 시도명) -->
+    <select id="getSidoMap" resultType="map">
+        SELECT DISTINCT
+            zcode AS `key`,
+            CASE zcode
+                WHEN '11' THEN '서울특별시'
+                WHEN '26' THEN '부산광역시'
+                WHEN '27' THEN '대구광역시'
+                WHEN '28' THEN '인천광역시'
+                WHEN '29' THEN '광주광역시'
+                WHEN '30' THEN '대전광역시'
+                WHEN '31' THEN '울산광역시'
+                WHEN '36' THEN '세종특별자치시'
+                WHEN '41' THEN '경기도'
+                WHEN '51' THEN '강원도'
+                WHEN '43' THEN '충청북도'
+                WHEN '44' THEN '충청남도'
+                WHEN '52' THEN '전라북도'
+                WHEN '46' THEN '전라남도'
+                WHEN '47' THEN '경상북도'
+                WHEN '48' THEN '경상남도'
+                WHEN '50' THEN '제주특별자치도'
+                ELSE '기타'
+                END AS `value`
+        FROM all_stations
+        WHERE zcode IS NOT NULL
+    </select>
+
+    <!-- ✅ 시도 이름 + 대표 좌표 (AVG lat/lon 포함) -->
+    <select id="getSidoMapWithCoord" resultType="map">
+        SELECT
+            zcode AS `key`,
+            CASE zcode
+                WHEN '11' THEN '서울특별시'
+                WHEN '26' THEN '부산광역시'
+                WHEN '27' THEN '대구광역시'
+                WHEN '28' THEN '인천광역시'
+                WHEN '29' THEN '광주광역시'
+                WHEN '30' THEN '대전광역시'
+                WHEN '31' THEN '울산광역시'
+                WHEN '36' THEN '세종특별자치시'
+                WHEN '41' THEN '경기도'
+                WHEN '51' THEN '강원도'
+                WHEN '43' THEN '충청북도'
+                WHEN '44' THEN '충청남도'
+                WHEN '52' THEN '전라북도'
+                WHEN '46' THEN '전라남도'
+                WHEN '47' THEN '경상북도'
+                WHEN '48' THEN '경상남도'
+                WHEN '50' THEN '제주특별자치도'
+                ELSE '기타'
+                END AS `value`,
+            AVG(lat) AS lat,
+            AVG(lng) AS lng
+        FROM all_stations
+        WHERE zcode IS NOT NULL
+        GROUP BY zcode
+    </select>
 </mapper>
