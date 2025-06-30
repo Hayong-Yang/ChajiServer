@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/favorite")
@@ -26,17 +27,17 @@ public class FavoriteStationController {
     }
 
     // 즐겨찾기 삭제
-    @DeleteMapping
+    @DeleteMapping("/delete")
     public void deleteFavorite(@RequestParam String statId, HttpServletRequest request) {
         int memberIdx = jwtUtil.getUserIdxFromRequest(request);
         favoriteStationService.deleteFavorite(memberIdx, statId);
     }
 
     // 즐겨찾기 목록 조회
-    @GetMapping("/stations")
-    public List<FavoriteStationDTO> getFavoritesByToken(HttpServletRequest request) {
+    @GetMapping("/list")
+    public List<Map<String, Object>> getFavoriteList(HttpServletRequest request) {
         int memberIdx = jwtUtil.getUserIdxFromRequest(request);
-        return favoriteStationService.getFavorites(memberIdx);
+        return favoriteStationService.getFavoritesWithDetail(memberIdx);
     }
 
     // 즐겨찾기 여부 확인

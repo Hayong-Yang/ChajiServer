@@ -24,4 +24,12 @@
         SELECT EXISTS (SELECT 1 FROM favorite_station WHERE member_idx = #{memberIdx} AND stat_id = #{statId})
     </select>
 
+    <select id="getFavoritesWithStationInfo" resultType="map">
+        SELECT fs.stat_id, s.stat_nm, s.addr, s.stat, s.chger_type
+        FROM favorite_station fs
+        JOIN all_stations s ON fs.stat_id = s.stat_id
+        WHERE fs.member_idx = #{memberIdx}
+        ORDER BY fs.created_at DESC
+    </select>
+
 </mapper>

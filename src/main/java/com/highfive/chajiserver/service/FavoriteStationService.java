@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -21,11 +22,11 @@ public class FavoriteStationService {
         favoriteStationMapper.deleteFavorite(memberIdx, stationId);
     }
 
-    public List<FavoriteStationDTO> getFavorites(int memberIdx) {
-        return favoriteStationMapper.getFavoriteByMember(memberIdx);
-    }
-
     public boolean isFavorite(int memberIdx, String statId) {
         return favoriteStationMapper.isFavorite(memberIdx, statId);
+    }
+
+    public List<Map<String, Object>> getFavoritesWithDetail(int memberIdx) {
+        return favoriteStationMapper.getFavoritesWithStationInfo(memberIdx);
     }
 }
