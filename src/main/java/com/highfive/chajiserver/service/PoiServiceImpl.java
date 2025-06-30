@@ -40,7 +40,7 @@ public class PoiServiceImpl implements PoiService {
                 .queryParam("count",          10)
                 .queryParam("resCoordType",   "WGS84GEO")
                 .queryParam("reqCoordType",   "WGS84GEO")
-                .encode(StandardCharsets.UTF_8)
+//                .encode(StandardCharsets.UTF_8)
                 .build();
         String url = comps.toUriString();
         System.out.println("▶ Autocomplete URL = " + url);
