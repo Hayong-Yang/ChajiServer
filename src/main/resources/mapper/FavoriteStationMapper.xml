@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.highfive.chajiserver.mapper.FavoriteStationMapper">
+
+    <insert id="insertFavorite">
+        INSERT INTO favorite_station (member_idx, stat_id, created_at)
+        VALUES (#{memberIdx}, #{statId}, NOW())
+    </insert>
+
+    <delete id="deleteFavorite">
+        DELETE FROM favorite_station
+        WHERE member_idx = #{memberIdx} AND stat_id = #{statId}
+    </delete>
+
+    <select id="getFavoriteByMember" resultType="com.highfive.chajiserver.dto.FavoriteStationDTO">
+        SELECT idx, member_idx, stat_id, created_at FROM favorite_station
+        WHERE member_idx = #{memberIdx} ORDER BY created_at DESC
+    </select>
+
+    <select id="isFavorite" resultType="boolean">
+        SELECT EXISTS (SELECT 1 FROM favorite_station WHERE member_idx = #{memberIdx} AND stat_id = #{statId})
+    </select>
+
+    <select id="getFavoritesWithStationInfo" resultType="map">
+        SELECT fs.stat_id, s.stat_nm, s.addr, s.stat, s.chger_type
+        FROM favorite_station fs
+        JOIN all_stations s ON fs.stat_id = s.stat_id
+        WHERE fs.member_idx = #{memberIdx}
+        ORDER BY fs.created_at DESC
+    </select>
+
+</mapper>
