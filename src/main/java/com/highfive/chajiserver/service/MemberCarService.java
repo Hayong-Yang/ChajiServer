@@ -36,5 +36,29 @@ public class MemberCarService {
 
         memberCarMapper.insertMemberCar(memberCar);
     }
+
+    public List<MemberCar> getMemberCars(int memberIdx) {
+        return memberCarMapper.selectMemberCars(memberIdx);
+    }
+
+    public void deleteMemberCar(int memberIdx, int carIdx) {
+        // 보안: 해당 사용자의 차량인지 검증 (필수는 아니지만 권장)
+        List<MemberCar> cars = memberCarMapper.selectMemberCars(memberIdx);
+        boolean ownsCar = cars.stream().anyMatch(c -> c.getIdx() == carIdx);
+        if (!ownsCar) {
+            throw new RuntimeException("해당 차량은 사용자에게 속해있지 않습니다.");
+        }
+
+        memberCarMapper.deleteMemberCar(carIdx);
+    }
+
+    public void updateMemberCar(MemberCarDTO dto) {
+        // 대표 차량 설정일 경우 기존 대표 차량 초기화
+        if (dto.isMain()) {
+            memberCarMapper.clearMainCar(dto.getMemberIdx());
+        }
+        memberCarMapper.updateMemberCar(dto);
+    }
+
 }
 

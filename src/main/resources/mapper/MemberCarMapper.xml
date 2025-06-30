@@ -10,9 +10,36 @@
         WHERE brand = #{brand} AND model = #{model} AND year = #{year} AND trim = #{trim}
     </select>
 
-    <select id="selectMemberCars" resultType="com.highfive.chajiserver.model.MemberCar">
-        SELECT * FROM member_car WHERE member_idx = #{memberIdx}
+    <select id="selectMemberCars" resultMap="MemberCarWithCarDataResultMap">
+        SELECT
+            mc.idx,
+            mc.member_idx,
+            mc.car_data_idx,
+            mc.nickname,
+            mc.is_main,
+            cd.brand,
+            cd.model,
+            cd.year,
+            cd.trim
+        FROM member_car mc
+                 JOIN car_data cd ON mc.car_data_idx = cd.idx
+        WHERE mc.member_idx = #{memberIdx}
     </select>
+
+    <resultMap id="MemberCarWithCarDataResultMap" type="com.highfive.chajiserver.dto.MemberCarDTO">
+        <id property="idx" column="idx"/>
+        <result property="memberIdx" column="member_idx"/>
+        <result property="carDataIdx" column="car_data_idx"/>
+        <result property="nickname" column="nickname"/>
+        <result property="isMain" column="is_main"/>
+
+        <!-- car_data 필드들 -->
+        <result property="brand" column="brand"/>
+        <result property="model" column="model"/>
+        <result property="year" column="year"/>
+        <result property="trim" column="trim"/>
+    </resultMap>
+
 
     <select id="countByMemberIdx" resultType="int">
         SELECT COUNT(*) FROM member_car WHERE member_idx = #{memberIdx}
@@ -22,5 +49,25 @@
         INSERT INTO member_car (member_idx, car_data_idx, nickname, is_main)
         VALUES (#{memberIdx}, #{carDataIdx}, #{nickname}, #{isMain})
     </insert>
+
+    <delete id="deleteMemberCar" parameterType="int">
+        DELETE FROM member_car WHERE idx = #{idx}
+    </delete>
+
+    <!-- 대표 차량 초기화 -->
+    <update id="clearMainCar" parameterType="int">
+        UPDATE member_car
+        SET is_main = false
+        WHERE member_idx = #{memberIdx}
+    </update>
+
+    <!-- 차량 정보 수정 -->
+    <update id="updateMemberCar" parameterType="com.highfive.chajiserver.dto.MemberCarDTO">
+        UPDATE member_car
+        SET car_data_idx = #{carDataIdx},
+            nickname = #{nickname},
+            is_main = #{isMain}
+        WHERE idx = #{idx} AND member_idx = #{memberIdx}
+    </update>
 
 </mapper>
