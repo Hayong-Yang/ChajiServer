@@ -58,6 +58,8 @@ public class StationServiceImpl implements StationService {
             double lat = extractDouble(body.get("lat"));
             double lon = extractDouble(body.get("lon"));
 
+            System.out.println("✅ 위도: " + lat + ", 경도: " + lon);
+
             boolean freeParking = Boolean.TRUE.equals(body.get("freeParking"));
             boolean noLimit = Boolean.TRUE.equals(body.get("noLimit"));
 
@@ -74,6 +76,7 @@ public class StationServiceImpl implements StationService {
             } else if (body.get("type") instanceof String) {
                 typeList.add(body.get("type").toString());
             }
+
 
             int outputMin = 0;
             int outputMax = 350;
@@ -93,9 +96,9 @@ public class StationServiceImpl implements StationService {
             // 1. 필터 통과한 충전기 목록
             List<StationDTO> passedList = new ArrayList<>();
             // 개발 전용 정적 충전소 데이터
-            for (StationDTO station : stationMemoryFromDBCache.getAllValue()) {
+//            for (StationDTO station : stationMemoryFromDBCache.getAllValue()) {
                 // 실시간 데이터 전용!!!!!
-//            for (StationDTO station : stationCache.getAll()) {
+            for (StationDTO station : stationCache.getAll()) {
                 if (!geoUtil.isWithinRadius(lat, lon, station.getLat(), station.getLng(), 1000)) continue;
                 if ("Y".equalsIgnoreCase(station.getDelYn())) continue;
                 if (freeParking && !"Y".equalsIgnoreCase(station.getParkingFree())) continue;
@@ -426,5 +429,3 @@ public class StationServiceImpl implements StationService {
     public List<StationDTO> AllStationsNearWaypoints(List<LatLngDTO> waypoints, double radiusMeters, StationFilterDTO filter) {
         return filterStations(waypoints, radiusMeters, false, filter);
     }
-
-} // class

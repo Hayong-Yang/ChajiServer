@@ -1,5 +1,7 @@
 package com.highfive.chajiserver.util;
 
+import com.highfive.chajiserver.dto.StationDTO;
+import com.highfive.chajiserver.dto.ZoomDTO;
 import com.highfive.chajiserver.dto.ZscodeMappingDTO;
 import com.highfive.chajiserver.mapper.MapMapper;
 import lombok.RequiredArgsConstructor;
@@ -8,10 +10,15 @@ import org.json.JSONObject;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
+import java.awt.*;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
@@ -28,7 +35,7 @@ public class ReverseGeo {
                     + "&coordType=WGS84GEO"
                     + "&addressType=A00"
                     + "&appKey=" + appKey;
-            System.out.println("보내는주소: " +urlStr);
+            System.out.println("보내는주소: " + urlStr);
 
             URL url = new URL(urlStr);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
@@ -49,7 +56,7 @@ public class ReverseGeo {
 
             //zscode 추출
             String adminDongCode = addressInfo.getString("adminDongCode");
-            String zcode = adminDongCode.substring(0,2);
+            String zcode = adminDongCode.substring(0, 2);
             String sigungu_name = addressInfo.getString("gu_gun").trim();
             // 띄어쓰기가 있을 경우 첫 번째 단어만 사용
             if (sigungu_name.contains(" ")) {
@@ -61,7 +68,7 @@ public class ReverseGeo {
             ZscodeMappingDTO zscodeDTO = new ZscodeMappingDTO();
             zscodeDTO.setZcode(zcode);
             zscodeDTO.setSigunguName(sigungu_name);
-            String zscode =mapper.getZscode(zscodeDTO);
+            String zscode = mapper.getZscode(zscodeDTO);
 
             System.out.println("구한 zscode: " + zscode);
             return zscode;
@@ -70,5 +77,5 @@ public class ReverseGeo {
             return null; // 또는 "00" 등 기본값
         }
     }
+}
 
-} //class
