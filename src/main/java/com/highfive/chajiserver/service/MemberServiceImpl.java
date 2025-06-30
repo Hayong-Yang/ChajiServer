@@ -7,6 +7,7 @@ import com.highfive.chajiserver.mapper.MemberMapper;
 import lombok.RequiredArgsConstructor;
 import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 
@@ -47,5 +48,23 @@ public class MemberServiceImpl implements MemberService{
     @Override
     public void logout(String token) {
 
+    }
+
+    @Override
+    public void update(String token, MemberDTO member) {
+        String jwt = token.replace("Bearer ", "");
+        String userId = jwtUtil.getUserIdFromToken(jwt);
+        MemberDTO original = mapper.findByUserId(userId);
+
+        if (original != null) {
+            if (StringUtils.hasText(member.getPassword())) {
+                String hashed = BCrypt.hashpw(member.getPassword(), BCrypt.gensalt());
+                original.setPassword(hashed);
+            }
+            if (StringUtils.hasText(member.getUserName())) {
+                original.setUserName(member.getUserName());
+            }
+            mapper.update(original);
+        }
     }
 }

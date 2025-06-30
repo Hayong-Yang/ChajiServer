@@ -1,5 +1,6 @@
 package com.highfive.chajiserver.mapper;
 
+import com.highfive.chajiserver.dto.MemberCarDTO;
 import com.highfive.chajiserver.model.CarData;
 import com.highfive.chajiserver.model.MemberCar;
 import org.apache.ibatis.annotations.Mapper;
@@ -34,4 +35,10 @@ public interface MemberCarMapper {
 
     // member_car 테이블 insert
     void insertMemberCar(MemberCar memberCar);
+
+    void deleteMemberCar(int idx);
+
+    void updateMemberCar(MemberCarDTO dto);
+
+    void clearMainCar(int memberIdx); // 대표 초기화
 }

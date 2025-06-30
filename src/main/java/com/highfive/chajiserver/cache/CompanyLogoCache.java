@@ -15,7 +15,6 @@ public class CompanyLogoCache {
         logoMap.put("PI", "/img/logos/gscharge.png");    // GS차지비
         logoMap.put("HD", "/img/logos/hyundai.png");     // 현대자동차
         logoMap.put("SK", "/img/logos/skenergy.png");    // SK에너지
-
         logoMap.put("AC", "/img/logos/outocripte.png");  // 아우토크립트
         logoMap.put("AH", "/img/logos/ahha.png");        // 아하
         logoMap.put("AL", "/img/logos/alone.png");       // 아론
@@ -49,6 +48,30 @@ public class CompanyLogoCache {
         logoMap.put("DO", "/img/logos/dahansong.png");   // 대한송유관공사
         logoMap.put("DP", "/img/logos/dau.png");         // 대유플러스
         logoMap.put("DR", "/img/logos/duruscob.png");    // 두루스코이브이
+        logoMap.put("DS", "/img/logos/DS.png");          // 대선==
+        logoMap.put("DY", "/img/logos/DY.png");          // 동양이엔피
+        logoMap.put("E0", "/img/logos/EO.png");          // 에너지플러스
+        logoMap.put("EA", "/img/logos/EA.png");          // 에바
+        logoMap.put("EB", "/img/logos/EB.png");          // 일렉트리
+        logoMap.put("EC", "/img/logos/EC.png");          // 이지차저
+        logoMap.put("EE", "/img/logos/EE.png");          // 이마트
+        logoMap.put("EG", "/img/logos/EG.png");          // 에너지파트너즈
+        logoMap.put("EH", "/img/logos/EH.png");          // 이앤에이치에너지
+        logoMap.put("EK", "/img/logos/EK.png");          // 엔라이튼
+        logoMap.put("EM", "/img/logos/EM.png");          // evmost ==
+        logoMap.put("EN", "/img/logos/EN.png");          // 이엔
+        logoMap.put("EO", "/img/logos/E0.png");          // E1
+        logoMap.put("EP", "/img/logos/EP.png");          // 이카플러그
+        logoMap.put("ER", "/img/logos/ER.png");          // 이엘일렉트릭
+        logoMap.put("ES", "/img/logos/ES.png");          // 이테스
+        logoMap.put("ET", "/img/logos/ET.png");          // 이씨티
+        logoMap.put("EZ", "/img/logos/EZ.png");          // 차지인
+        logoMap.put("FE", "/img/logos/FE.png");          // 에프이씨 ==
+        logoMap.put("FT", "/img/logos/FT.png");          // 포티투닷
+        logoMap.put("G1", "/img/logos/G1.png");          // 광주시
+        logoMap.put("G2", "/img/logos/G2.png");          // 광주시
+
+        // ... ⚠️ 나머지 코드는 필요 시 계속 추가
 
 
         logoMap.put("GR", "/img/logos/skenergy.png");    // 그리드위즈
@@ -73,6 +96,33 @@ public class CompanyLogoCache {
         logoMap.put("KA", "/img/logos/skenergy.png");    // 기아자동차
         logoMap.put("KC", "/img/logos/skenergy.png");    // 한국컴퓨터
         logoMap.put("KE", "/img/logos/skenergy.png");    // 한국전기차인프라기술
+        logoMap.put("KL", "/img/logos/skenergy.png");    // 클린일렉스
+        logoMap.put("KM", "/img/logos/skenergy.png");    // 카카오모빌리티
+        logoMap.put("KN", "/img/logos/skenergy.png");    // 한국환경공단
+        logoMap.put("KO", "/img/logos/skenergy.png");    // 이브이파트너스
+        logoMap.put("KS", "/img/logos/skenergy.png");    // 이브이씨코리아
+        logoMap.put("KT", "/img/logos/skenergy.png");    // 케이티
+        logoMap.put("LC", "/img/logos/skenergy.png");    // 롯데건설
+        logoMap.put("LD", "/img/logos/skenergy.png");    // 롯데이노베이트
+        logoMap.put("LH", "/img/logos/skenergy.png");    // LG유플러스 볼트업
+        logoMap.put("LI", "/img/logos/skenergy.png");    // 엘에스이링크
+        logoMap.put("LT", "/img/logos/skenergy.png");    // 광성계측기
+        logoMap.put("MA", "/img/logos/skenergy.png");    // 맥플러스
+        logoMap.put("MO", "/img/logos/skenergy.png");    // 매니지온
+        logoMap.put("MR", "/img/logos/skenergy.png");    // 미래씨앤엘
+        logoMap.put("MT", "/img/logos/skenergy.png");    // 모던텍
+        logoMap.put("NB", "/img/logos/skenergy.png");    // 엔비플러스
+        logoMap.put("NE", "/img/logos/skenergy.png");    // 에너넷
+        logoMap.put("NH", "/img/logos/skenergy.png");    // 농협경제지주 신재생에너지
+        logoMap.put("NS", "/img/logos/skenergy.png");    // 뉴텍솔루션
+        logoMap.put("NT", "/img/logos/skenergy.png");    // 한국전자금융
+        logoMap.put("NX", "/img/logos/skenergy.png");    // 넥씽
+        logoMap.put("OB", "/img/logos/skenergy.png");    // 현대오일뱅크
+        logoMap.put("PC", "/img/logos/skenergy.png");    // 파킹클라우드
+        logoMap.put("PE", "/img/logos/skenergy.png");    // 피앤이시스템즈
+        logoMap.put("PK", "/img/logos/skenergy.png");    // 펌프킨
+        logoMap.put("PL", "/img/logos/skenergy.png");    // 플러그링크
+
 
 
 
