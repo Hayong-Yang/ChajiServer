@@ -156,6 +156,8 @@ public class StationServiceImpl implements StationService {
                 obj.put("recommendScore", score);
                 obj.put("logoUrl", CompanyLogoCache.getLogoUrl(rep.getBusiId()));
                 obj.put("useTime", rep.getUseTime());
+                obj.put("busiCall", rep.getBusiCall());
+                obj.put("limitDetail", rep.getLimitDetail());
 
                 JSONArray chargers = new JSONArray();
                 for (Map.Entry<StationDTO, Integer> entry : group) {
@@ -307,27 +309,46 @@ public class StationServiceImpl implements StationService {
             for (StationDTO s : stations) zones[zoneIndex].add(s.getStatId());
         }
 
-        // 7. 각 zone별 충전소 중 대표 충전소 선정 + 점수 높은 충전소 2개 추출
+        // 7. 각 zone별 충전소 중 대표 충전소 선정 + 점수 높은 충전소 2개 추출 + statId 중복시 다시 뽑기
+//        List<StationDTO> result = new ArrayList<>();
+//        for (Set<String> zone : zones) {
+//            List<StationDTO> zoneList = zone.stream()
+//                    .map(groupedByStation::get) // 충전소 전체 리스트
+//                    .filter(Objects::nonNull)
+//                    .map(list -> list.stream()  // 해당 충전소 중 출력 높은 대표 1개
+//                            .max(Comparator.comparingDouble(c -> safeParseOutput(c.getOutput())))
+//                            .orElse(null))
+//                    .filter(Objects::nonNull)
+//                    .toList();
+//            // zone별 상위 2개 충전소 추천
+//            result.addAll(selectTopStationsByScore(zoneList, groupedByStation, 2, priority));
+//        }
         List<StationDTO> result = new ArrayList<>();
+        Set<String> addedStatIds = new HashSet<>();
+
         for (Set<String> zone : zones) {
             List<StationDTO> zoneList = zone.stream()
-                    .map(groupedByStation::get) // 충전소 전체 리스트
+                    .map(groupedByStation::get)
                     .filter(Objects::nonNull)
-                    .map(list -> list.stream()  // 해당 충전소 중 출력 높은 대표 1개
+                    .map(list -> list.stream()
                             .max(Comparator.comparingDouble(c -> safeParseOutput(c.getOutput())))
                             .orElse(null))
                     .filter(Objects::nonNull)
                     .toList();
-            // zone별 상위 2개 충전소 추천
-            result.addAll(selectTopStationsByScore(zoneList, groupedByStation, 2, priority));
-        }
 
-//        // tmap 우회시간 판단 로직
-//        // zoneList는 현재 대표 충전소 목록 (1 zone당 5~10개 예상)
-//        List<StationDTO> evaluated = evaluateStationsByDetour(zoneList, start, end);
-//
-//        // evaluated에서 상위 N개 선택
-//        result.addAll(evaluated.subList(0, Math.min(2, evaluated.size())));
+            // 점수순 정렬
+            List<StationDTO> topByScore = selectTopStationsByScore(zoneList, groupedByStation, zoneList.size(), priority);
+
+            int added = 0;
+            for (StationDTO s : topByScore) {
+                if (added >= 2) break;
+                if (!addedStatIds.contains(s.getStatId())) {
+                    result.add(s);
+                    addedStatIds.add(s.getStatId());
+                    added++;
+                }
+            }
+        }
 
         // 8. 전체 추천 충전소 반환
         return result;
@@ -408,29 +429,3 @@ public class StationServiceImpl implements StationService {
     public List<StationDTO> AllStationsNearWaypoints(List<LatLngDTO> waypoints, double radiusMeters, StationFilterDTO filter) {
         return filterStations(waypoints, radiusMeters, false, filter);
     }
-
-
-//    // tmap 우회부분
-//    private List<StationDTO> evaluateStationsByDetour(List<StationDTO> stations, LatLngDTO start, LatLngDTO end) {
-//        ExecutorService executor = Executors.newFixedThreadPool(5);
-//
-//        List<CompletableFuture<StationDTO>> futures = stations.stream()
-//                .map(station -> CompletableFuture.supplyAsync(() -> {
-//                    long delay = tmapUtil.getDetourTimeInSeconds(start, station.toLatLng(), end);
-//                    station.setTempScore((int) delay); // 단위: 초
-//                    return station;
-//                }, executor))
-//                .toList();
-//
-//        List<StationDTO> evaluated = futures.stream()
-//                .map(CompletableFuture::join)
-//                .filter(s -> s.getTempScore() > 0 && s.getTempScore() < 99999)
-//                .sorted(Comparator.comparingInt(StationDTO::getTempScore))
-//                .toList();
-//
-//        executor.shutdown(); // 리소스 정리
-//
-//        return evaluated;
-//    }
-
-} // class

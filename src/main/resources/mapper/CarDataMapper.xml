@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.highfive.chajiserver.mapper.CarDataMapper">
+
+    <select id="getAllBrands" resultType="string">
+        SELECT DISTINCT brand FROM car_data
+    </select>
+
+    <select id="getModelsByBrand" resultType="string" parameterType="string">
+        SELECT DISTINCT model FROM car_data WHERE brand = #{brand}
+    </select>
+
+    <select id="getYearsByBrandAndModel" resultType="int">
+        SELECT DISTINCT year FROM car_data
+        WHERE brand = #{brand} AND model = #{model} ORDER BY year
+    </select>
+
+    <select id="getTrimsByBrandModelYear" resultType="string">
+        SELECT DISTINCT trim FROM car_data
+        WHERE brand = #{brand} AND model = #{model} AND year = #{year}
+    </select>
+
+    <select id="selectCarDataByDetail" resultType="com.highfive.chajiserver.model.CarData">
+        SELECT * FROM car_data
+        WHERE brand = #{brand} AND model = #{model} AND year = #{year} AND trim = #{trim}
+    </select>
+
+    <select id="findCarDataIdx" resultType="int">
+        SELECT idx FROM car_data
+        WHERE brand = #{brand} AND model = #{model} AND year = #{year} AND trim = #{trim}
+    </select>
+
+</mapper>

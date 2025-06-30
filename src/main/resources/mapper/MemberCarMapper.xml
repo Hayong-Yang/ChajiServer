@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.highfive.chajiserver.mapper.MemberCarMapper">
+
+    <select id="findCarDataIdx" parameterType="map" resultType="int">
+        SELECT idx FROM car_data
+        WHERE brand = #{brand} AND model = #{model} AND year = #{year} AND trim = #{trim}
+    </select>
+
+    <select id="selectMemberCars" resultType="com.highfive.chajiserver.model.MemberCar">
+        SELECT * FROM member_car WHERE member_idx = #{memberIdx}
+    </select>
+
+    <select id="countByMemberIdx" resultType="int">
+        SELECT COUNT(*) FROM member_car WHERE member_idx = #{memberIdx}
+    </select>
+
+    <insert id="insertMemberCar" parameterType="com.highfive.chajiserver.dto.MemberCarDTO">
+        INSERT INTO member_car (member_idx, car_data_idx, nickname, is_main)
+        VALUES (#{memberIdx}, #{carDataIdx}, #{nickname}, #{isMain})
+    </insert>
+
+</mapper>
