@@ -48,5 +48,12 @@ public class MemberController {
         service.logout(token);
         return ResponseEntity.ok("로그아웃 성공(클라이언트에서 토큰 삭제)");
     }
+
+    @PutMapping("/update")
+    public ResponseEntity<?> update(@RequestHeader("Authorization") String token,
+                                    @RequestBody MemberDTO member) {
+        service.update(token, member);
+        return ResponseEntity.ok("회원정보 수정 성공");
+    }
 }
 

@@ -112,6 +112,33 @@ public class CompanyLogoCache {
         logoMap.put("KA", "/img/logos/skenergy.png");    // 기아자동차
         logoMap.put("KC", "/img/logos/skenergy.png");    // 한국컴퓨터
         logoMap.put("KE", "/img/logos/skenergy.png");    // 한국전기차인프라기술
+        logoMap.put("KL", "/img/logos/skenergy.png");    // 클린일렉스
+        logoMap.put("KM", "/img/logos/skenergy.png");    // 카카오모빌리티
+        logoMap.put("KN", "/img/logos/skenergy.png");    // 한국환경공단
+        logoMap.put("KO", "/img/logos/skenergy.png");    // 이브이파트너스
+        logoMap.put("KS", "/img/logos/skenergy.png");    // 이브이씨코리아
+        logoMap.put("KT", "/img/logos/skenergy.png");    // 케이티
+        logoMap.put("LC", "/img/logos/skenergy.png");    // 롯데건설
+        logoMap.put("LD", "/img/logos/skenergy.png");    // 롯데이노베이트
+        logoMap.put("LH", "/img/logos/skenergy.png");    // LG유플러스 볼트업
+        logoMap.put("LI", "/img/logos/skenergy.png");    // 엘에스이링크
+        logoMap.put("LT", "/img/logos/skenergy.png");    // 광성계측기
+        logoMap.put("MA", "/img/logos/skenergy.png");    // 맥플러스
+        logoMap.put("MO", "/img/logos/skenergy.png");    // 매니지온
+        logoMap.put("MR", "/img/logos/skenergy.png");    // 미래씨앤엘
+        logoMap.put("MT", "/img/logos/skenergy.png");    // 모던텍
+        logoMap.put("NB", "/img/logos/skenergy.png");    // 엔비플러스
+        logoMap.put("NE", "/img/logos/skenergy.png");    // 에너넷
+        logoMap.put("NH", "/img/logos/skenergy.png");    // 농협경제지주 신재생에너지
+        logoMap.put("NS", "/img/logos/skenergy.png");    // 뉴텍솔루션
+        logoMap.put("NT", "/img/logos/skenergy.png");    // 한국전자금융
+        logoMap.put("NX", "/img/logos/skenergy.png");    // 넥씽
+        logoMap.put("OB", "/img/logos/skenergy.png");    // 현대오일뱅크
+        logoMap.put("PC", "/img/logos/skenergy.png");    // 파킹클라우드
+        logoMap.put("PE", "/img/logos/skenergy.png");    // 피앤이시스템즈
+        logoMap.put("PK", "/img/logos/skenergy.png");    // 펌프킨
+        logoMap.put("PL", "/img/logos/skenergy.png");    // 플러그링크
+
 
 
 
