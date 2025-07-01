@@ -86,6 +86,38 @@ public class CompanyLogoCache {
         logoMap.put("SB", "/img/logos/SB.png");          // 소프트베리
         logoMap.put("SC", "/img/logos/SC.png");          // 삼척시
         logoMap.put("SD", "/img/logos/SD.png");          // 스칼라데이터
+        logoMap.put("SE", "/img/logos/SE.png");          // 서울시
+        logoMap.put("SF", "/img/logos/SF.png");          // 스타코프
+        logoMap.put("SG", "/img/logos/SG.png");          // sk시그넷
+        logoMap.put("SH", "/img/logos/SH.png");          // 에스에이치에너지
+        logoMap.put("SJ", "/img/logos/SJ.png");          // 세종시
+        logoMap.put("SR", "/img/logos/SR.png");          // sk렌터카
+        logoMap.put("SL", "/img/logos/SL.png");          // 에스에스기전
+        logoMap.put("SM", "/img/logos/SM.png");          // 성민기업
+        logoMap.put("SN", "/img/logos/SN.png");          // 서울에너지공사
+        logoMap.put("SO", "/img/logos/SO.png");          // 선광시스템
+        logoMap.put("SP", "/img/logos/SP.png");          // 스마트포트테크놀로지
+        logoMap.put("SS", "/img/logos/SS.png");          // 투이스이브이씨 ==
+        logoMap.put("ST", "/img/logos/ST.png");          // sk일렉링크
+        logoMap.put("SU", "/img/logos/SU.png");          // 순천시 체육시설관리소
+        logoMap.put("SZ", "/img/logos/SZ.png");          // sg생활안전
+        logoMap.put("TB", "/img/logos/TB.png");          // 태백시
+        logoMap.put("TD", "/img/logos/TD.png");          // 타디스테크놀로지
+        logoMap.put("TH", "/img/logos/TH.png");          // 태현교통
+        logoMap.put("TL", "/img/logos/TL.png");          // 티엘컴퍼니
+        logoMap.put("TM", "/img/logos/TM.png");          // 티맵
+        logoMap.put("TR", "/img/logos/TR.png");          // 한마음장애인복지회
+        logoMap.put("TS", "/img/logos/TS.png");          // 태성콘텍
+        logoMap.put("TU", "/img/logos/TU.png");          // 티비유
+        logoMap.put("TV", "/img/logos/TV.png");          // 아이토브
+        logoMap.put("UN", "/img/logos/UN.png");          // 유니이브이
+        logoMap.put("UP", "/img/logos/UP.png");          // 유플러스아이티
+        logoMap.put("US", "/img/logos/US.png");          // 울산시
+        logoMap.put("VT", "/img/logos/VT.png");          // 볼타
+        logoMap.put("WB", "/img/logos/WB.png");          // 이브이루씨
+        logoMap.put("YC", "/img/logos/YC.png");          // 노란충전
+        logoMap.put("YY", "/img/logos/YY.png");          // 양양군
+        logoMap.put("ZE", "/img/logos/ZE.png");          // 이브이모드코리아
 
         // ... ⚠️ 나머지 코드는 필요 시 계속 추가
 

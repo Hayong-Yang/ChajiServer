@@ -17,5 +17,15 @@
         WHERE busiId = #{busiId}
             LIMIT 1
     </select>
+    <select id="getAllFees" resultType="com.highfive.chajiserver.dto.ChargerFeeDTO">
+        SELECT
+            busiId,
+            bnm,
+            fast_member_price AS fastMemberPrice,
+            fast_nonmember_price AS fastNonmemberPrice,
+            low_member_price AS lowMemberPrice,
+            low_nonmember_price AS lowNonmemberPrice
+        FROM charger_fee
+    </select>
 
 </mapper>

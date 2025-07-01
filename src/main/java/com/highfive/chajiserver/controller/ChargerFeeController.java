@@ -1,7 +1,8 @@
 package com.highfive.chajiserver.controller;
 
+import com.highfive.chajiserver.cache.ChargerFeeMemoryCache;
 import com.highfive.chajiserver.dto.ChargerFeeDTO;
-import com.highfive.chajiserver.service.ChargerFeeService;
+import com.highfive.chajiserver.service.ChargerFeeServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -10,11 +11,12 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/charger-fee")
 @RequiredArgsConstructor
 public class ChargerFeeController {
-    private final ChargerFeeService chargerFeeService;
+
+    private final ChargerFeeMemoryCache feeCache;
 
     @GetMapping("/{busiId}")
     public ChargerFeeDTO getFee(@PathVariable String busiId) {
-        return chargerFeeService.getFeeByBusiId(busiId);
+        return feeCache.get(busiId);
     }
 }
 
