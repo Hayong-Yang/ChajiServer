@@ -1,8 +1,10 @@
 package com.highfive.chajiserver.service;
 
+import com.highfive.chajiserver.cache.ChargerFeeMemoryCache;
 import com.highfive.chajiserver.cache.CompanyLogoCache;
 import com.highfive.chajiserver.cache.StationCache;
 import com.highfive.chajiserver.cache.StationMemoryFromDBCache;
+import com.highfive.chajiserver.dto.ChargerFeeDTO;
 import com.highfive.chajiserver.dto.LatLngDTO;
 import com.highfive.chajiserver.dto.StationDTO;
 import com.highfive.chajiserver.dto.StationFilterDTO;
@@ -31,6 +33,7 @@ public class StationServiceImpl implements StationService {
     private final GeoUtil geoUtil;
     private final AllStationsDBUtil allStationsDBUtil;
     private final StationMemoryFromDBCache stationMemoryFromDBCache;
+    private final ChargerFeeMemoryCache feeCache;
 
     // [화면 위치 기반으로 주변 충전소를 공공 API로 불러와 전역 캐시에 저장]
     @Override
@@ -161,6 +164,14 @@ public class StationServiceImpl implements StationService {
                 obj.put("useTime", rep.getUseTime());
                 obj.put("busiCall", rep.getBusiCall());
                 obj.put("limitDetail", rep.getLimitDetail());
+//요금db 메모리에 넣기
+                ChargerFeeDTO fee = feeCache.get(rep.getBusiId().trim().toUpperCase());
+                if (fee != null) {
+                    obj.put("fastMemberPrice", fee.getFastMemberPrice());
+                    obj.put("fastNonmemberPrice", fee.getFastNonmemberPrice());
+                    obj.put("lowMemberPrice", fee.getLowMemberPrice());
+                    obj.put("lowNonmemberPrice", fee.getLowNonmemberPrice());
+                }
 
                 JSONArray chargers = new JSONArray();
                 for (Map.Entry<StationDTO, Integer> entry : group) {
