@@ -70,64 +70,54 @@ public class CompanyLogoCache {
         logoMap.put("FT", "/img/logos/FT.png");          // 포티투닷
         logoMap.put("G1", "/img/logos/G1.png");          // 광주시
         logoMap.put("G2", "/img/logos/G2.png");          // 광주시
-
-        // ... ⚠️ 나머지 코드는 필요 시 계속 추가
-
-
-        logoMap.put("GR", "/img/logos/skenergy.png");    // 그리드위즈
-        logoMap.put("GS", "/img/logos/skenergy.png");    // GS칼텍스
-        logoMap.put("HB", "/img/logos/skenergy.png");    // 에이치엘비생명과학
-        logoMap.put("HE", "/img/logos/skenergy.png");    // 한국전기차충전서비스
-        logoMap.put("HL", "/img/logos/skenergy.png");    // 에이치엘비일렉
-        logoMap.put("HM", "/img/logos/skenergy.png");    // 휴맥스이브이
-        logoMap.put("HP", "/img/logos/skenergy.png");    // 해피차지
-        logoMap.put("HR", "/img/logos/skenergy.png");    // 한국홈충전
-        logoMap.put("HS", "/img/logos/skenergy.png");    // 홈앤서비스
-        logoMap.put("HW", "/img/logos/skenergy.png");    // 한화솔루션
-        logoMap.put("HY", "/img/logos/skenergy.png");    // 현대엔지니어링
-        logoMap.put("IM", "/img/logos/skenergy.png");    // 아이마켓코리아
-        logoMap.put("IN", "/img/logos/skenergy.png");    // 신세계아이앤씨
-        logoMap.put("IO", "/img/logos/skenergy.png");    // 아이온커뮤니케이션즈
-        logoMap.put("IV", "/img/logos/skenergy.png");    // 인큐버스
-        logoMap.put("JA", "/img/logos/skenergy.png");    // 이브이시스
-        logoMap.put("JE", "/img/logos/skenergy.png");    // 제주전기자동차서비스
-        logoMap.put("JH", "/img/logos/skenergy.png");    // 종하이앤씨
-        logoMap.put("JN", "/img/logos/skenergy.png");    // 제이앤씨플랜
-        logoMap.put("KA", "/img/logos/skenergy.png");    // 기아자동차
-        logoMap.put("KC", "/img/logos/skenergy.png");    // 한국컴퓨터
-        logoMap.put("KE", "/img/logos/skenergy.png");    // 한국전기차인프라기술
-        logoMap.put("KL", "/img/logos/skenergy.png");    // 클린일렉스
-        logoMap.put("KM", "/img/logos/skenergy.png");    // 카카오모빌리티
-        logoMap.put("KN", "/img/logos/skenergy.png");    // 한국환경공단
-        logoMap.put("KO", "/img/logos/skenergy.png");    // 이브이파트너스
-        logoMap.put("KS", "/img/logos/skenergy.png");    // 이브이씨코리아
-        logoMap.put("KT", "/img/logos/skenergy.png");    // 케이티
-        logoMap.put("LC", "/img/logos/skenergy.png");    // 롯데건설
-        logoMap.put("LD", "/img/logos/skenergy.png");    // 롯데이노베이트
-        logoMap.put("LH", "/img/logos/skenergy.png");    // LG유플러스 볼트업
-        logoMap.put("LI", "/img/logos/skenergy.png");    // 엘에스이링크
-        logoMap.put("LT", "/img/logos/skenergy.png");    // 광성계측기
-        logoMap.put("MA", "/img/logos/skenergy.png");    // 맥플러스
-        logoMap.put("MO", "/img/logos/skenergy.png");    // 매니지온
-        logoMap.put("MR", "/img/logos/skenergy.png");    // 미래씨앤엘
-        logoMap.put("MT", "/img/logos/skenergy.png");    // 모던텍
-        logoMap.put("NB", "/img/logos/skenergy.png");    // 엔비플러스
-        logoMap.put("NE", "/img/logos/skenergy.png");    // 에너넷
-        logoMap.put("NH", "/img/logos/skenergy.png");    // 농협경제지주 신재생에너지
-        logoMap.put("NS", "/img/logos/skenergy.png");    // 뉴텍솔루션
-        logoMap.put("NT", "/img/logos/skenergy.png");    // 한국전자금융
-        logoMap.put("NX", "/img/logos/skenergy.png");    // 넥씽
-        logoMap.put("OB", "/img/logos/skenergy.png");    // 현대오일뱅크
-        logoMap.put("PC", "/img/logos/skenergy.png");    // 파킹클라우드
-        logoMap.put("PE", "/img/logos/skenergy.png");    // 피앤이시스템즈
-        logoMap.put("PK", "/img/logos/skenergy.png");    // 펌프킨
-        logoMap.put("PL", "/img/logos/skenergy.png");    // 플러그링크
-
-
-
-
-
-
+        logoMap.put("GR", "/img/logos/GR.png");          // 그리드위즈
+        logoMap.put("GS", "/img/logos/GS.png");          // GS칼텍스
+        logoMap.put("HB", "/img/logos/HB.png");          // 에이치엘비생명과학
+        logoMap.put("HE", "/img/logos/HE.png");          // 한국전기차충전서비스
+        logoMap.put("HL", "/img/logos/HL.png");          // 에이치엘비일렉
+        logoMap.put("HM", "/img/logos/HM.png");          // 휴맥스이브이
+        logoMap.put("HP", "/img/logos/HP.png");          // 해피차지
+        logoMap.put("HR", "/img/logos/HR.png");          // 한국홈충전
+        logoMap.put("HS", "/img/logos/HS.png");          // 홈앤서비스
+        logoMap.put("HW", "/img/logos/HW.png");          // 한화솔루션
+        logoMap.put("HY", "/img/logos/HY.png");          // 현대엔지니어링
+        logoMap.put("IM", "/img/logos/IM.png");          // 아이마켓코리아
+        logoMap.put("IN", "/img/logos/IN.png");          // 신세계아이앤씨
+        logoMap.put("IO", "/img/logos/IO.png");          // 아이온커뮤니케이션즈
+        logoMap.put("IV", "/img/logos/IV.png");          // 인큐버스
+        logoMap.put("JA", "/img/logos/JA.png");          // 이브이시스
+        logoMap.put("JE", "/img/logos/JE.png");          // 제주전기자동차서비스
+        logoMap.put("JH", "/img/logos/JH.png");          // 종하이앤씨
+        logoMap.put("JN", "/img/logos/JN.png");          // 제이앤씨플랜
+        logoMap.put("KA", "/img/logos/KA.png");          // 기아자동차
+        logoMap.put("KC", "/img/logos/KC.png");          // 한국컴퓨터
+        logoMap.put("KE", "/img/logos/KE.png");          // 한국전기차인프라기술
+        logoMap.put("KL", "/img/logos/KL.png");          // 클린일렉스
+        logoMap.put("KM", "/img/logos/KM.png");          // 카카오모빌리티
+        logoMap.put("KN", "/img/logos/KN.png");          // 한국환경공단
+        logoMap.put("KO", "/img/logos/KO.png");          // 이브이파트너스
+        logoMap.put("KS", "/img/logos/KS.png");          // 이브이씨코리아
+        logoMap.put("KT", "/img/logos/KT.png");          // 케이티
+        logoMap.put("LC", "/img/logos/LC.png");          // 롯데건설
+        logoMap.put("LD", "/img/logos/LD.png");          // 롯데이노베이트
+        logoMap.put("LH", "/img/logos/LH.png");          // LG유플러스 볼트업
+        logoMap.put("LI", "/img/logos/LI.png");          // 엘에스이링크
+        logoMap.put("LT", "/img/logos/LT.png");          // 광성계측기
+        logoMap.put("MA", "/img/logos/MA.png");          // 맥플러스
+        logoMap.put("MO", "/img/logos/MO.png");          // 매니지온
+        logoMap.put("MR", "/img/logos/MR.png");          // 미래씨앤엘
+        logoMap.put("MT", "/img/logos/MT.png");          // 모던텍
+        logoMap.put("NB", "/img/logos/NB.png");          // 엔비플러스
+        logoMap.put("NE", "/img/logos/NE.png");          // 에너넷
+        logoMap.put("NH", "/img/logos/NH.png");          // 농협경제지주 신재생에너지
+        logoMap.put("NS", "/img/logos/NS.png");          // 뉴텍솔루션
+        logoMap.put("NT", "/img/logos/NT.png");          // 한국전자금융
+        logoMap.put("NX", "/img/logos/NX.png");          // 넥씽
+        logoMap.put("OB", "/img/logos/OB.png");          // 현대오일뱅크
+        logoMap.put("PC", "/img/logos/PC.png");          // 파킹클라우드
+        logoMap.put("PE", "/img/logos/PE.png");          // 피앤이시스템즈
+        logoMap.put("PK", "/img/logos/PK.png");          // 펌프킨
+        logoMap.put("PL", "/img/logos/PL.png");          // 플러그링크
     }
 
     // 정적 접근 메서드
